@@ -1,32 +1,32 @@
 page { background: #faf8f4; color: #59634e; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 28rpx; line-height: 1.5; }
 view, text, button, input, textarea { box-sizing: border-box; }
-button { padding: 0; margin: 0; font-size: inherit; line-height: 1.5; border-radius: 0; background: transparent; color: inherit; }
+button { width: auto; padding: 0; margin: 0; font-size: inherit; line-height: 1.5; border-radius: 0; background: transparent; color: inherit; }
 button::after { border: 0; }
 button[disabled] { color: #89958c; background: #e5e8e1; }
 input, textarea { width: 100%; font-size: 28rpx; color: #59634e; }
-.page { padding: 32rpx 36rpx 60rpx; }
+.page { width: 100%; padding: 44rpx 48rpx 72rpx; padding-bottom: calc(72rpx + env(safe-area-inset-bottom)); }
 .eyebrow { font-size: 19rpx; font-weight: 600; letter-spacing: 4rpx; color: #89917c; }
-.page-title { font-size: 48rpx; font-weight: 600; letter-spacing: 2rpx; line-height: 1.3; }
+.page-title { font-size: 44rpx; font-weight: 600; letter-spacing: 2rpx; line-height: 1.4; }
 .subtitle { color: #81877b; font-size: 25rpx; margin-top: 12rpx; }
 .muted { color: #81877b; }
 .row { display: flex; align-items: center; }
 .between { display: flex; justify-content: space-between; align-items: center; gap: 16rpx; }
-.card { background: #fffdf8; border: 1rpx solid #e9e7db; border-radius: 24rpx; padding: 28rpx; }
-.section { margin-top: 36rpx; }
+.card { background: #fffdf8; border: 1rpx solid #e1dfd1; border-radius: 28rpx; padding: 32rpx; }
+.section { margin-top: 44rpx; }
 .section-title { font-size: 30rpx; font-weight: 600; }
-.section-head { margin-bottom: 20rpx; }
+.section-head { margin-bottom: 24rpx; }
 .text-link { font-size: 24rpx; color: #657756; padding: 12rpx 0 12rpx 16rpx; }
 .pill { display: inline-flex; align-items: center; border-radius: 100rpx; padding: 6rpx 16rpx; background: #edf0e6; color: #647554; font-size: 20rpx; }
-.primary { color: #fffdf8; background: #7e8e6b; padding: 24rpx; border-radius: 16rpx; font-weight: 500; }
-.secondary { border: 1rpx solid #dce0d1; background: #f3f5ed; border-radius: 16rpx; padding: 22rpx; color: #7e8e6b; }
+.primary { display: block; width: 100%; color: #fffdf8; background: #7e8e6b; padding: 24rpx; border-radius: 16rpx; font-weight: 500; }
+.secondary { display: block; width: 100%; border: 1rpx solid #dce0d1; background: #f3f5ed; border-radius: 16rpx; padding: 22rpx; color: #7e8e6b; }
 .danger-link { color: #ab6451; font-size: 25rpx; padding: 26rpx 0 4rpx; }
 .progress-track { height: 8rpx; border-radius: 20rpx; background: #e9ecdf; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 20rpx; background: #8c9e74; transition: width .25s; }
+.progress-fill { height: 100%; border-radius: 20rpx; background: #8c9e74; transition: width .36s ease-out; }
 .empty { padding: 66rpx 24rpx; text-align: center; color: #7f8877; }
 .empty-symbol { width: 84rpx; height: 84rpx; line-height: 80rpx; border: 1rpx solid #dce1d1; border-radius: 50%; margin: 0 auto 22rpx; font-size: 44rpx; color: #94a27b; }
 .empty-title { font-size: 30rpx; color: #7e8e6b; margin-bottom: 12rpx; }
 .empty-copy { font-size: 24rpx; line-height: 1.9; }
-.field { margin-bottom: 26rpx; }
+.field { margin-bottom: 32rpx; }
 .field-label { display: block; font-size: 24rpx; color: #68745f; margin-bottom: 12rpx; }
 .field-input { background: #f4f5ee; border: 1rpx solid #e6e8dd; border-radius: 14rpx; padding: 22rpx; min-height: 88rpx; }
 input.field-input { height: 88rpx; }
@@ -43,7 +43,25 @@ textarea.field-input { height: 160rpx; }
 .safe-bottom { padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }
 .loading-line { color: #8b937f; text-align: center; font-size: 22rpx; padding-bottom: 16rpx; }
 .checkbox { width: 42rpx; height: 42rpx; flex-shrink: 0; border: 2rpx solid #cbd2bc; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 25rpx; }
-.checkbox.checked { border-color: #6f8460; background: #6f8460; color: white; }
+.checkbox.checked { border-color: #6f8460; background: #6f8460; color: white; animation: check-pop .24s ease-out; }
 .overdue { color: #ad7359 !important; }
-.page-heading-illustration { width: 96rpx; height: 96rpx; float: right; margin: 0 0 4rpx 14rpx; }
+.page-heading { display: flex; align-items: center; gap: 20rpx; margin-bottom: 12rpx; }
+.page-heading-copy { flex: 1; min-width: 0; }
+.page-heading-illustration { width: 88rpx; height: 88rpx; flex-shrink: 0; }
 .empty-illustration { width: 170rpx; height: 170rpx; display: block; margin: 0 auto 26rpx; }
+
+/* WeChat hover classes work on touch screens without relying on :hover. */
+.pressable { transition: transform .16s ease-out, opacity .16s ease-out, background-color .2s ease-out, border-color .2s ease-out; }
+.pressable.is-pressed { transform: scale(.97); opacity: .78; }
+.checkbox.is-pressed { transform: scale(.86); }
+button[disabled].is-pressed { transform: none; opacity: 1; }
+.page-enter .enter-block { animation: content-in .36s cubic-bezier(.2, .7, .3, 1) backwards; }
+.page-enter .enter-later { animation-delay: .05s; }
+.page-enter .enter-last { animation-delay: .1s; }
+@keyframes content-in { from { opacity: 0; transform: translateY(16rpx); } to { opacity: 1; transform: translateY(0); } }
+@keyframes check-pop { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .page-enter .enter-block, .checkbox.checked { animation: none; }
+  .pressable, .progress-fill { transition: none; }
+  .pressable.is-pressed { transform: none; }
+}

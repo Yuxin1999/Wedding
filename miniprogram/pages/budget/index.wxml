@@ -1,41 +1,43 @@
-<view class="page budget-page">
-  <image class="page-heading-illustration" src="/assets/illustrations/wallet.png" mode="aspectFit" />
-  <view class="eyebrow">ROOM FOR EVERY WISH</view><view class="page-title title-row">心意，也有计划</view><view class="subtitle">花得明白，才能更安心地期待。</view>
+<view class="{{ready && pageVisible ? 'page-enter' : ''}} page budget-page">
+  <view class="page-heading enter-block">
+    <view class="page-heading-copy"><view class="eyebrow">ROOM FOR EVERY WISH</view><view class="page-title title-row">心意，也有计划</view><view class="subtitle">花得明白，才能更安心地期待。</view></view>
+    <image class="page-heading-illustration" src="/assets/illustrations/wallet.png" mode="aspectFit" />
+  </view>
   <view wx:if="{{loading}}" class="loading-line">正在整理预算…</view>
-  <view wx:if="{{errorMessage}}" class="notice error-notice" bindtap="refresh">{{errorMessage}} · 点此重试</view>
+  <view wx:if="{{errorMessage}}" class="pressable notice error-notice" bindtap="refresh" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{errorMessage}} · 点此重试</view>
   <block wx:if="{{ready}}">
-    <view class="budget-hero section">
-      <view class="between"><text class="budget-label">婚礼总预算</text><button class="budget-edit" bindtap="setBudget">调整 ›</button></view>
+    <view class="enter-block enter-last budget-hero section">
+      <view class="between"><text class="budget-label">婚礼总预算</text><button class="pressable budget-edit" bindtap="setBudget" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">调整 ›</button></view>
       <view wx:if="{{profile.totalBudget}}" class="budget-total"><text>¥</text>{{stats.budgetText}}</view>
-      <button wx:else class="budget-unset" bindtap="setBudget">一起定个小目标 ↗</button>
+      <button wx:else class="pressable budget-unset" bindtap="setBudget" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">一起定个小目标 ↗</button>
       <view class="budget-divider"></view>
       <view class="money-grid"><view><view class="money-label">预计开支</view><view class="money-value">¥{{stats.plannedText}}</view></view><view><view class="money-label">已经支付</view><view class="money-value">¥{{stats.paidText}}</view></view></view>
       <view wx:if="{{profile.totalBudget}}" class="budget-remaining">{{paidOverBudget ? '已付超出预算' : '预算尚余'}} <text>¥{{stats.remainingText}}</text><text class="budget-small">（按已付计算）</text></view>
     </view>
     <view wx:if="{{stats.overBudget}}" class="notice over-notice">预计开支已超过总预算。可以一起看看哪些心意最值得保留，或调整总预算。</view>
-    <view wx:if="{{breakdown.length}}" class="section card breakdown">
+    <view wx:if="{{breakdown.length}}" class="enter-block enter-last section card breakdown">
       <view class="between"><text class="section-title">预算花在哪里</text><text class="breakdown-label">按预计开支</text></view>
       <view class="stacked-bar"><view wx:for="{{breakdown}}" wx:key="name" class="bar-segment" style="width: {{item.percent}}%; background: {{item.color}};"></view></view>
       <view class="legend"><view wx:for="{{breakdown}}" wx:key="name" class="legend-item"><view class="row"><view class="legend-dot" style="background: {{item.color}};"></view><text>{{item.name}}</text></view><text>¥{{item.amount}}</text></view></view>
     </view>
-    <view class="section"><view class="between section-head"><text class="section-title">每一笔心意</text><button class="text-link" bindtap="openAdd">＋ 记一笔</button></view>
-      <scroll-view wx:if="{{breakdown.length}}" scroll-x="{{true}}" class="expense-filters" show-scrollbar="{{false}}"><view class="expense-filter-inner"><button class="expense-filter {{category === '全部' ? 'active' : ''}}" data-category="全部" bindtap="setCategory">全部</button><button wx:for="{{breakdown}}" wx:key="name" class="expense-filter {{category === item.name ? 'active' : ''}}" data-category="{{item.name}}" bindtap="setCategory">{{item.name}}</button></view></scroll-view>
-      <view wx:for="{{expenses}}" wx:key="id" class="card expense-card" data-id="{{item.id}}" bindtap="openEdit">
+    <view class="enter-block enter-last section"><view class="between section-head"><text class="section-title">每一笔心意</text><button class="pressable text-link" bindtap="openAdd" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">＋ 记一笔</button></view>
+      <scroll-view wx:if="{{breakdown.length}}" scroll-x="{{true}}" class="expense-filters" show-scrollbar="{{false}}"><view class="expense-filter-inner"><button class="pressable expense-filter {{category === '全部' ? 'active' : ''}}" data-category="全部" bindtap="setCategory" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">全部</button><button wx:for="{{breakdown}}" wx:key="name" class="pressable expense-filter {{category === item.name ? 'active' : ''}}" data-category="{{item.name}}" bindtap="setCategory" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{item.name}}</button></view></scroll-view>
+      <view wx:for="{{expenses}}" wx:key="id" class="pressable card expense-card" data-id="{{item.id}}" bindtap="openEdit" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">
         <view class="between"><image class="expense-illustration" src="{{item.illustration}}" mode="aspectFit" /><view class="expense-name">{{item.title}}</view><view class="expense-amount">¥{{item.plannedText}}</view></view>
         <view class="between expense-meta"><view class="row"><view class="legend-dot" style="background: {{item.color}};"></view><text>{{item.category}}</text></view><text class="{{item.exceeded ? 'overdue' : ''}}">已付 ¥{{item.paidText}}{{item.exceeded ? ' · 超预计' : ''}}</text></view>
         <view wx:if="{{item.note}}" class="expense-note">{{item.note}}</view>
       </view>
-      <view wx:if="{{!expenses.length}}" class="card empty"><image class="empty-illustration" src="/assets/illustrations/gift.png" mode="aspectFit" /><view class="empty-title">把第一份心意记在这里</view><view class="empty-copy">场地、婚纱、喜糖，或一束花。<view>预计花多少、已付多少，都心中有数。</view></view><button class="primary empty-button" bindtap="openAdd">＋ 添加一笔开支</button></view>
+      <view wx:if="{{!expenses.length}}" class="card empty"><image class="empty-illustration" src="/assets/illustrations/gift.png" mode="aspectFit" /><view class="empty-title">把第一份心意记在这里</view><view class="empty-copy">场地、婚纱、喜糖，或一束花。<view>预计花多少、已付多少，都心中有数。</view></view><button class="pressable primary empty-button" bindtap="openAdd" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">＋ 添加一笔开支</button></view>
     </view>
     <view class="footer-note">用喜欢的方式，准备喜欢的婚礼。</view>
   </block>
 </view>
-<bottom-sheet visible="{{editor}}" title="{{editingId ? '这笔心意的详情' : '记一笔心意'}}" bindclose="closeEditor">
+<bottom-sheet visible="{{editor}}" busy="{{saving}}" title="{{editingId ? '这笔心意的详情' : '记一笔心意'}}" bindclose="closeEditor">
   <view class="field"><text class="field-label">开支名称</text><input class="field-input" maxlength="60" placeholder="比如：婚礼摄影团队" value="{{form.title}}" data-field="title" bindinput="field" /></view>
   <view class="field"><text class="field-label">分类</text><picker range="{{categories}}" value="{{categoryIndex}}" bindchange="chooseCategory"><view class="field-input between"><text>{{form.category}}</text><text class="muted">⌄</text></view></picker></view>
   <view class="form-row"><view class="field"><text class="field-label">预计总金额（元）</text><input class="field-input" type="digit" maxlength="12" placeholder="0.00" value="{{form.plannedInput}}" data-field="plannedInput" bindinput="field" /></view><view class="field"><text class="field-label">已付金额（元）</text><input class="field-input" type="digit" maxlength="12" placeholder="0.00" value="{{form.paidInput}}" data-field="paidInput" bindinput="field" /></view></view>
   <view class="field"><text class="field-label">备注</text><textarea class="field-input" maxlength="300" placeholder="套餐内容、尾款时间，或需要留意的细节…" value="{{form.note}}" data-field="note" bindinput="field" /></view>
   <view class="field-hint note-spacing">这里用于记账，不会发起支付。已付金额包含定金和后续付款。</view>
-  <button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">保存这笔开支</button>
-  <button wx:if="{{editingId}}" class="danger-link" bindtap="remove" disabled="{{saving}}">删除这笔开支</button>
+  <button class="pressable primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">保存这笔开支</button>
+  <button wx:if="{{editingId}}" class="pressable danger-link" bindtap="remove" disabled="{{saving}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">删除这笔开支</button>
 </bottom-sheet>

@@ -1,13 +1,13 @@
-<view wx:if="{{visible}}" class="sheet-root" catchtouchmove="noop">
+<view wx:if="{{mounted}}" class="sheet-root {{closing ? 'sheet-closing' : ''}}" catchtouchmove="noop">
   <view class="sheet-mask" bindtap="close"></view>
   <view class="sheet-panel">
     <view class="sheet-handle"></view>
     <view class="between sheet-header">
       <text class="section-title">{{title}}</text>
-      <button class="sheet-close" bindtap="close" aria-label="关闭">×</button>
+      <button class="sheet-close pressable" hover-class="is-pressed" hover-stay-time="100" bindtap="close" disabled="{{busy || closing}}" aria-label="关闭">×</button>
     </view>
     <scroll-view scroll-y="{{true}}" class="sheet-body" enhanced="{{true}}">
-      <view class="sheet-content safe-bottom"><slot></slot></view>
+      <view class="sheet-content"><slot></slot></view>
     </scroll-view>
   </view>
 </view>

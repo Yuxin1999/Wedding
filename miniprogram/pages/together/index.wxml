@@ -1,50 +1,50 @@
-<view class="page together-page">
+<view class="{{ready && pageVisible ? 'page-enter' : ''}} page together-page">
   <view class="eyebrow centered">TWO PEOPLE, ONE LITTLE WORLD</view>
   <view wx:if="{{loading}}" class="loading-line">正在打开我们的小世界…</view>
-  <view wx:if="{{errorMessage}}" class="notice error-notice" bindtap="refresh">{{errorMessage}} · 点此重试</view>
-  <button wx:if="{{errorMessage && mode === 'cloud'}}" class="secondary" bindtap="localMode">查看保留的本机计划</button>
+  <view wx:if="{{errorMessage}}" class="pressable notice error-notice" bindtap="refresh" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{errorMessage}} · 点此重试</view>
+  <button wx:if="{{errorMessage && mode === 'cloud'}}" class="pressable secondary" bindtap="localMode" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">查看保留的本机计划</button>
   <block wx:if="{{ready}}">
-    <view class="couple-section">
+    <view class="enter-block couple-section">
       <image class="couple-illustration" src="/assets/illustrations/wedding-hero.webp" mode="aspectFit" />
       <view class="couple-heading">{{profile.name1}}<text>&</text>{{profile.name2}}</view><view class="subtitle">成为一家人的路上，每一步都算数。</view>
     </view>
-    <view class="card profile-card">
-      <view class="between section-head"><text class="section-title">我们的约定</text><button class="text-link" bindtap="openEditor">编辑 ›</button></view>
-      <view class="profile-row" bindtap="openEditor"><text>婚礼日期</text><text class="profile-value">{{profile.weddingDate || '选一个好日子'}} <text class="chevron">›</text></text></view>
-      <view class="profile-row" bindtap="openEditor"><text>婚礼城市 / 场地</text><text class="profile-value">{{profile.location || '还在期待中'}} <text class="chevron">›</text></text></view>
-      <view class="profile-row" bindtap="openEditor"><text>婚礼总预算</text><text class="profile-value">{{profile.totalBudget ? '¥' + stats.budgetText : '一起商量'}} <text class="chevron">›</text></text></view>
+    <view class="enter-block card profile-card">
+      <view class="between section-head"><text class="section-title">我们的约定</text><button class="pressable text-link" bindtap="openEditor" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">编辑 ›</button></view>
+      <view class="pressable profile-row" bindtap="openEditor" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>婚礼日期</text><text class="profile-value">{{profile.weddingDate || '选一个好日子'}} <text class="chevron">›</text></text></view>
+      <view class="pressable profile-row" bindtap="openEditor" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>婚礼城市 / 场地</text><text class="profile-value">{{profile.location || '还在期待中'}} <text class="chevron">›</text></text></view>
+      <view class="pressable profile-row" bindtap="openEditor" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>婚礼总预算</text><text class="profile-value">{{profile.totalBudget ? '¥' + stats.budgetText : '一起商量'}} <text class="chevron">›</text></text></view>
     </view>
-    <view class="card section space-card">
+    <view class="enter-block enter-last card section space-card">
       <view class="between"><view class="section-title">两个人，一起准备</view><text class="pill">{{mode === 'cloud' ? '云端同步' : '本机保存'}}</text></view>
       <block wx:if="{{mode === 'local'}}">
         <view class="space-copy">{{configured ? '创建一个共同空间，把这些小小的计划分享给对方。' : '现在可以先在这台设备上规划。开启双人空间后，任务、分工和预算就能一起更新。'}}</view>
-        <block wx:if="{{configured}}"><button class="primary" bindtap="connect" loading="{{connecting}}" disabled="{{connecting}}">创建 / 连接共同空间</button><button class="join-link" bindtap="openJoin" disabled="{{connecting}}">已有伴侣的邀请码？点此加入</button></block>
+        <block wx:if="{{configured}}"><button class="pressable primary" bindtap="connect" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">创建 / 连接共同空间</button><button class="pressable join-link" bindtap="openJoin" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">已有伴侣的邀请码？点此加入</button></block>
         <block wx:else><button class="secondary unavailable" disabled="{{true}}">双人同步待开通</button><view class="space-footnote">本机体验版 · 当前记录不会同步给伴侣</view></block>
       </block>
       <block wx:else>
         <view class="space-copy">{{memberCount === 2 ? '你们已经在同一个空间。每次打开页面或下拉刷新，都能看到对方最新的安排。' : '空间已经准备好，还差另一个主角。把邀请码交给伴侣，一起开始吧。'}}</view>
         <view wx:if="{{memberCount === 2}}" class="bound-note">♡ 两位主角，已到齐</view>
-        <block wx:else><button class="primary" bindtap="invite" loading="{{connecting}}" disabled="{{connecting}}">{{inviteCode ? '重新生成邀请码' : '邀请我的伴侣'}}</button><view wx:if="{{inviteCode}}" class="invite-box"><text class="invite-code" selectable="{{true}}">{{inviteCode}}</text><button class="text-link" bindtap="copyInvite">复制邀请码</button><view class="field-hint">7 天内有效 · 重新生成后旧码失效</view></view></block>
-        <button class="local-link" bindtap="localMode">查看保留的本机计划</button>
+        <block wx:else><button class="pressable primary" bindtap="invite" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{inviteCode ? '重新生成邀请码' : '邀请我的伴侣'}}</button><view wx:if="{{inviteCode}}" class="invite-box"><text class="invite-code" selectable="{{true}}">{{inviteCode}}</text><button class="pressable text-link" bindtap="copyInvite" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">复制邀请码</button><view class="field-hint">7 天内有效 · 重新生成后旧码失效</view></view></block>
+        <button class="pressable local-link" bindtap="localMode" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">查看保留的本机计划</button>
       </block>
     </view>
-    <view class="card section tools-card"><button class="tool-row" bindtap="copySummary"><view><view>复制备婚摘要</view><view class="tool-note">留作纪念，或亲手分享给对方</view></view><text class="chevron">↗</text></button><button class="tool-row" bindtap="openGallery"><view><view>翻翻插画小册</view><view class="tool-note">20 个温柔的婚礼小图案</view></view><text class="chevron">↗</text></button><button class="tool-row" bindtap="privacy"><text>关于我们的数据</text><text class="chevron">›</text></button></view>
+    <view class="enter-block enter-last card section tools-card"><button class="pressable tool-row" bindtap="copySummary" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><view><view>复制备婚摘要</view><view class="tool-note">留作纪念，或亲手分享给对方</view></view><text class="chevron">↗</text></button><button class="pressable tool-row" bindtap="openGallery" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><view><view>翻翻插画小册</view><view class="tool-note">20 个温柔的婚礼小图案</view></view><text class="chevron">↗</text></button><button class="pressable tool-row" bindtap="privacy" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>关于我们的数据</text><text class="chevron">›</text></button></view>
     <view class="footer-note">一起备婚 · 让期待落在每个日常里</view>
   </block>
 </view>
-<bottom-sheet visible="{{editor}}" title="写下我们的约定" bindclose="closeEditor">
+<bottom-sheet visible="{{editor}}" busy="{{saving}}" title="写下我们的约定" bindclose="closeEditor">
   <view class="form-row"><view class="field"><text class="field-label">{{role === 'p2' ? '伴侣的称呼' : '你的称呼'}}</text><input class="field-input" maxlength="16" value="{{form.name1}}" data-field="name1" bindinput="field" placeholder="怎么称呼你" /></view><view class="field"><text class="field-label">{{role === 'p2' ? '你的称呼' : '伴侣的称呼'}}</text><input class="field-input" maxlength="16" value="{{form.name2}}" data-field="name2" bindinput="field" placeholder="怎么称呼对方" /></view></view>
-  <view class="field"><view class="between"><text class="field-label">婚礼日期</text><button wx:if="{{form.weddingDate}}" class="text-link" bindtap="clearDate">先不定日期</button></view><picker mode="date" start="2000-01-01" end="2100-12-31" value="{{form.weddingDate}}" bindchange="chooseDate"><view class="field-input between"><text>{{form.weddingDate || '选择你们的好日子'}}</text><text class="muted">⌄</text></view></picker><view class="field-hint">改动婚期时，默认清单日期会一起调整；手动设置的日期保持不变。</view></view>
+  <view class="field"><view class="between"><text class="field-label">婚礼日期</text><button wx:if="{{form.weddingDate}}" class="pressable text-link" bindtap="clearDate" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">先不定日期</button></view><picker mode="date" start="2000-01-01" end="2100-12-31" value="{{form.weddingDate}}" bindchange="chooseDate"><view class="field-input between"><text>{{form.weddingDate || '选择你们的好日子'}}</text><text class="muted">⌄</text></view></picker><view class="field-hint">改动婚期时，默认清单日期会一起调整；手动设置的日期保持不变。</view></view>
   <view class="field"><text class="field-label">婚礼城市 / 场地（可选）</text><input class="field-input" maxlength="60" value="{{form.location}}" data-field="location" bindinput="field" placeholder="你们想在哪里说“我愿意”" /></view>
   <view class="field"><text class="field-label">婚礼总预算（元）</text><input class="field-input" type="digit" maxlength="12" value="{{form.budgetInput}}" data-field="budgetInput" bindinput="field" placeholder="还没决定可以先留空" /></view>
-  <button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">保存我们的约定</button>
+  <button class="pressable primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">保存我们的约定</button>
 </bottom-sheet>
 <bottom-sheet visible="{{gallery}}" title="婚礼小小的可爱" bindclose="closeGallery">
   <view class="gallery-caption">柔和色块、细细线条，把每一份心意都画成小小的图案。</view>
   <view class="illustration-gallery"><view wx:for="{{galleryItems}}" wx:key="id" class="gallery-item"><image src="/assets/illustrations/{{item.id}}.png" mode="aspectFit" /><view>{{item.title}}</view></view></view>
 </bottom-sheet>
-<bottom-sheet visible="{{joinEditor}}" title="加入伴侣的共同空间" bindclose="closeJoin">
+<bottom-sheet visible="{{joinEditor}}" busy="{{connecting}}" title="加入伴侣的共同空间" bindclose="closeJoin">
   <view class="field"><text class="field-label">伴侣发来的邀请码</text><input class="field-input code-input" maxlength="12" placeholder="输入 12 位邀请码" value="{{joinCode}}" bindinput="codeInput" /></view>
   <view class="notice join-notice">加入后显示伴侣空间里的计划。你这台设备原有的本机计划会保留，但不会自动合并。</view>
-  <button class="primary" bindtap="join" loading="{{connecting}}" disabled="{{connecting}}">一起开始准备</button>
+  <button class="pressable primary" bindtap="join" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">一起开始准备</button>
 </bottom-sheet>

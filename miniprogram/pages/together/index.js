@@ -4,8 +4,9 @@ const ui = require('../../utils/ui');
 const galleryItems = require('../../utils/illustration-catalog');
 
 Page({
-  data: { loading: true, ready: false, errorMessage: '', editor: false, joinEditor: false, gallery: false, galleryItems, saving: false, connecting: false, form: {}, joinCode: '', inviteCode: '', configured: store.configured(), mode: store.mode() },
-  onShow() { this.refresh(); },
+  data: { loading: true, ready: false, pageVisible: false, errorMessage: '', editor: false, joinEditor: false, gallery: false, galleryItems, saving: false, connecting: false, form: {}, joinCode: '', inviteCode: '', configured: store.configured(), mode: store.mode() },
+  onHide() { this.setData({ pageVisible: false }); },
+  onShow() { this.setData({ pageVisible: true }); this.refresh(); },
   async onPullDownRefresh() { await this.refresh(); wx.stopPullDownRefresh(); },
   async refresh() {
     this.setData({ loading: true, errorMessage: '' });

@@ -45,7 +45,10 @@ const config = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
     assert.ok(tree.children.length, `${pagePath} editor`);
     console.log(`Native WXML compiled + render tree produced: ${pagePath}`);
   }
-  assert.ok(render('components/bottom-sheet/index.wxml')({ visible: true, title: '安排' }).children.length);
+  for (const closing of [false, true]) {
+    const sheet = render('components/bottom-sheet/index.wxml')({ mounted: true, closing, title: '安排', busy: false });
+    assert.match(JSON.stringify(sheet), /sheet-panel/, 'Sheet must render throughout entry and exit');
+  }
   delete global.wx; delete global.Page;
 
   const platform = process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'windows' : 'linux';

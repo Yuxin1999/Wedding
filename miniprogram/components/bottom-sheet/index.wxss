@@ -1,8 +1,17 @@
 .sheet-root { position: fixed; inset: 0; z-index: 100; }
-.sheet-mask { position: absolute; inset: 0; background: rgba(28, 40, 30, .32); }
-.sheet-panel { position: absolute; bottom: 0; left: 0; right: 0; background: #fffefb; border-radius: 34rpx 34rpx 0 0; padding-top: 16rpx; }
+.sheet-mask { position: absolute; inset: 0; background: rgba(28, 40, 30, .32); animation: mask-in .26s ease-out both; }
+.sheet-panel { position: absolute; bottom: 20rpx; bottom: calc(20rpx + env(safe-area-inset-bottom)); left: 24rpx; right: 24rpx; background: #fffefb; border: 1rpx solid #e3e1d5; border-radius: 36rpx; padding-top: 18rpx; overflow: hidden; box-shadow: 0 16rpx 60rpx rgba(43, 55, 37, .14); animation: sheet-in .28s cubic-bezier(.2, .7, .3, 1) both; }
 .sheet-handle { width: 66rpx; height: 6rpx; border-radius: 8rpx; margin: 0 auto; background: #dfe2d4; }
-.sheet-header { padding: 22rpx 36rpx; }
-.sheet-close { font-size: 42rpx; color: #859079; width: 60rpx; height: 60rpx; }
-.sheet-body { height: 68vh; }
-.sheet-content { padding: 4rpx 36rpx 48rpx; }
+.sheet-header { padding: 24rpx 32rpx 26rpx 40rpx; }
+.sheet-close { font-size: 42rpx; color: #859079; width: 64rpx; height: 64rpx; flex-shrink: 0; border-radius: 50%; background: #f1f3e9; }
+.sheet-body { height: 64vh; max-height: calc(100vh - 240rpx - env(safe-area-inset-bottom)); }
+.sheet-content { padding: 12rpx 40rpx 44rpx; }
+.sheet-closing .sheet-panel { animation: sheet-out .22s ease-in both; pointer-events: none; }
+.sheet-closing .sheet-mask { animation: mask-out .22s ease-in both; }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(80rpx); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sheet-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(80rpx); } }
+@keyframes mask-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mask-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel, .sheet-mask, .sheet-closing .sheet-panel, .sheet-closing .sheet-mask { animation-duration: .01s; }
+}

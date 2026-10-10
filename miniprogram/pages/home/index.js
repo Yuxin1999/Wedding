@@ -4,8 +4,9 @@ const ui = require('../../utils/ui');
 const { categoryIcon } = require('../../utils/illustrations');
 
 Page({
-  data: { loading: true, ready: false, errorMessage: '' },
-  onShow() { this.refresh(); },
+  data: { loading: true, ready: false, pageVisible: false, errorMessage: '' },
+  onHide() { this.setData({ pageVisible: false }); },
+  onShow() { this.setData({ pageVisible: true }); this.refresh(); },
   async onPullDownRefresh() { await this.refresh(); wx.stopPullDownRefresh(); },
   async refresh() {
     this.setData({ loading: true, errorMessage: '' });

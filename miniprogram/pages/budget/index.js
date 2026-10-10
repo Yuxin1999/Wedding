@@ -5,8 +5,9 @@ const { categoryIcon } = require('../../utils/illustrations');
 const COLORS = ['#6d8059', '#b4b991', '#d2bd8c', '#9aada0', '#c8a493', '#b6bcb2'];
 
 Page({
-  data: { loading: true, ready: false, errorMessage: '', categories: domain.CATEGORIES, category: '全部', editor: false, saving: false, form: {} },
-  onShow() { this.refresh(); },
+  data: { loading: true, ready: false, pageVisible: false, errorMessage: '', categories: domain.CATEGORIES, category: '全部', editor: false, saving: false, form: {} },
+  onHide() { this.setData({ pageVisible: false }); },
+  onShow() { this.setData({ pageVisible: true }); this.refresh(); },
   async onPullDownRefresh() { await this.refresh(); wx.stopPullDownRefresh(); },
   async refresh() {
     this.setData({ loading: true, errorMessage: '' });

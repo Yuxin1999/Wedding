@@ -1,5 +1,5 @@
 .title-row { margin-top: 12rpx; }
-.budget-hero { background: #e9eddf; border: 1rpx solid #dce3ce; border-radius: 28rpx; padding: 28rpx 32rpx; }
+.budget-hero { background: #e9eddf; border: 1rpx solid #dce3ce; border-radius: 28rpx; padding: 36rpx; }
 .budget-label { color: #7b8c67; font-size: 24rpx; }
 .budget-edit { font-size: 23rpx; color: #7b8c67; padding: 8rpx 0 8rpx 20rpx; }
 .budget-total { font-family: Georgia, serif; font-size: 70rpx; line-height: 1.4; margin-top: 10rpx; overflow-wrap: anywhere; }
@@ -16,17 +16,17 @@
 .over-notice { margin-top: 20rpx; background: #f2eadd; color: #a18154; }
 .breakdown-label { font-size: 20rpx; color: #98a087; }
 .stacked-bar { display: flex; height: 18rpx; border-radius: 20rpx; overflow: hidden; background: #f0f2e8; margin: 26rpx 0; }
-.bar-segment { height: 100%; }
+.bar-segment { height: 100%; transition: width .36s ease-out; }
 .legend { display: flex; flex-wrap: wrap; gap: 18rpx 26rpx; }
 .legend-item { width: calc(50% - 13rpx); display: flex; justify-content: space-between; font-size: 21rpx; color: #929a83; gap: 8rpx; }
 .legend-dot { width: 10rpx; height: 10rpx; border-radius: 50%; margin-right: 10rpx; flex-shrink: 0; }
 .expense-filters { white-space: nowrap; margin-bottom: 20rpx; }
-.expense-filter-inner { display: inline-flex; gap: 14rpx; }
+.expense-filter-inner { display: inline-flex; gap: 14rpx; padding: 4rpx 2rpx 10rpx; }
 .expense-filter { color: #8d967d; padding: 9rpx 20rpx; border: 1rpx solid #e1e5d5; font-size: 23rpx; border-radius: 40rpx; }
 .expense-filter.active { background: #e6ecdb; color: #506544; border-color: #d7dfc6; }
-.expense-card { margin-bottom: 18rpx; }
-.expense-name { font-size: 28rpx; flex: 1; overflow-wrap: anywhere; }
-.expense-amount { font-size: 32rpx; font-family: Georgia, serif; text-align: right; }
+.expense-card { margin-bottom: 22rpx; }
+.expense-name { font-size: 28rpx; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.expense-amount { max-width: 48%; font-size: 30rpx; font-family: Georgia, serif; text-align: right; overflow-wrap: anywhere; }
 .expense-meta { font-size: 21rpx; color: #89967c; margin-top: 18rpx; }
 .expense-note { border-top: 1rpx solid #eef0e5; padding-top: 16rpx; margin-top: 16rpx; color: #9aa28d; font-size: 22rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .empty-button { margin: 30rpx auto 0; width: 330rpx; font-size: 25rpx; }

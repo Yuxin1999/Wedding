@@ -5,12 +5,14 @@ const { categoryIcon } = require('../../utils/illustrations');
 
 Page({
   data: {
-    loading: true, ready: false, errorMessage: '', filter: 'pending', category: '全部', ownerIndex: 0, query: '',
+    loading: true, ready: false, pageVisible: false, errorMessage: '', filter: 'pending', category: '全部', ownerIndex: 0, query: '',
     filters: [{ key: 'pending', label: '待完成' }, { key: 'all', label: '全部' }, { key: 'done', label: '已完成' }],
     categories: domain.CATEGORIES, categoryFilters: ['全部'].concat(domain.CATEGORIES), ownerFilters: ['所有人', '一起', '我', 'TA'],
     editor: false, saving: false, form: {}, tasks: []
   },
+  onHide() { this.setData({ pageVisible: false }); },
   onShow() {
+    this.setData({ pageVisible: true });
     const category = wx.getStorageSync('wedding:task-category');
     if (domain.CATEGORIES.includes(category)) { this.setData({ category, filter: 'pending', ownerIndex: 0, query: '' }); wx.setStorageSync('wedding:task-category', ''); }
     this.refresh();
