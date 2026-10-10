@@ -19,6 +19,9 @@ const config = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
   const context = vm.createContext({ window: {}, console });
   const render = vm.runInContext(`(function(global){${source}})({})`, context);
   const storage = new Map();
+  const domain = require('../shared/domain');
+  const initial = domain.applyCommand(domain.createWorkspace(), { type: 'addExpense', payload: { title: '摄影定金', category: '摄影摄像', planned: 200000, paid: 100000, taskId: 'starter-4', paymentDueDate: '2000-01-01', note: '' } }, 'compile-linked-expense');
+  storage.set('wedding:local:v1', initial);
   global.wx = {
     getStorageSync: key => storage.get(key), setStorageSync: (key, value) => storage.set(key, value),
     showToast() {}, vibrateShort() {}, switchTab() {}

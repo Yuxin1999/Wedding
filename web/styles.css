@@ -110,6 +110,22 @@ h1 { font-family: var(--serif); font-size: 30px; font-weight: 500; line-height: 
 .task-toggle:hover { background: #eef1e7; border-color: #9ead89; }
 .is-done .task-toggle { background: #9aab86; border-color: #9aab86; color: white; }
 .task-description { flex: 1; min-width: 0; text-align: left; }
+.task-copy { flex: 1; min-width: 0; }
+.task-copy .task-description { width: 100%; }
+.linked-action { display: block; width: 100%; text-align: left; font-size: 11px; line-height: 1.8; color: #7b8b68; margin-top: 10px; padding: 7px 0; overflow-wrap: anywhere; }
+.linked-action:hover { color: #4f683f; }
+.budget-task-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; color: #8a957a; font-size: 11px; margin-bottom: 18px; }
+.budget-task-filter select { flex: 1; min-width: 0; max-width: 100%; }
+.linked-budget-summary { margin-bottom: 18px; }
+.linked-budget-summary .text-button { display: block; }
+.expense-entry { border-top: 1px dashed #e7e8dc; padding-bottom: 14px; }
+.expense-entry .expense-row { border-top: 0; padding-bottom: 8px; }
+.expense-detail { font-size: 11px; color: #899579; margin: 8px 0 0; overflow-wrap: anywhere; }
+.payment-reminders { margin-top: 24px; }
+.payment-reminder { width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px 0; border-bottom: 1px dashed #e7e8dc; text-align: left; color: #7c896c; font-size: 12px; }
+.payment-reminder > span { min-width: 0; overflow-wrap: anywhere; }
+.payment-reminder strong { font-weight: 500; }
+.payment-reminder small { display: block; font-size: 10px; margin-top: 5px; color: #949d86; }
 .task-name { display: block; font-size: 13px; color: #626b55; overflow-wrap: anywhere; }
 .is-done .task-name { text-decoration: line-through; color: #a0a68f; }
 .task-details { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 10px; color: #969e85; margin-top: 7px; }

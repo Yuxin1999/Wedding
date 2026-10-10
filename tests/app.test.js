@@ -72,6 +72,42 @@ test('local user journey: set wedding, add/complete task, track expenses, reload
   delete global.wx;
 });
 
+test('native task-budget navigation, binding, reminders and deletion preserve existing money', async () => {
+  const wx = makeWx(); global.wx = wx;
+  const tasks = page('tasks', wx); await tasks.refresh();
+  tasks.openBudget({ currentTarget: { dataset: { id: 'starter-4' } } });
+  const budget = page('budget', wx); await budget.onShow();
+  assert.equal(budget.data.taskFilter, 'starter-4');
+  budget.openAdd();
+  assert.equal(budget.data.form.taskId, 'starter-4');
+  assert.equal(budget.data.form.category, '摄影摄像');
+  budget.setData({ 'form.title': '摄影定金', 'form.plannedInput': '2000.10', 'form.paidInput': '1000.05' });
+  budget.choosePaymentDate({ detail: { value: '2000-01-01' } }); await budget.save();
+  const deposit = budget.data.expenses[0];
+  assert.equal(deposit.paymentOverdue, true);
+  budget.openAdd(); budget.setData({ 'form.title': '摄影尾款', 'form.plannedInput': '6000.20' }); await budget.save();
+  await tasks.refresh();
+  assert.equal(tasks.data.tasks.find(item => item.id === 'starter-4').budget.plannedText, '8,000.30');
+  const home = page('home', wx); await home.refresh();
+  assert.equal(home.data.paymentReminderCount, 1);
+  home.openPayment({ currentTarget: { dataset: { id: deposit.id } } }); await budget.onShow();
+  assert.equal(budget.data.editingId, deposit.id);
+  budget.setData({ 'form.paidInput': '2000.10' }); await budget.save();
+  await home.refresh(); assert.equal(home.data.paymentReminderCount, 0);
+  budget.openTask({ currentTarget: { dataset: { id: 'starter-4' } } }); await tasks.onShow();
+  assert.equal(tasks.data.editingId, 'starter-4');
+  tasks.setData({ 'form.title': '预约摄影' }); await tasks.save(); await budget.refresh();
+  assert.equal(budget.data.expenses[0].taskTitle, '预约摄影');
+  budget.openEdit({ currentTarget: { dataset: { id: deposit.id } } }); budget.chooseTask({ detail: { value: 0 } }); await budget.save();
+  assert.equal(budget.data.expenses.find(item => item.id === deposit.id).taskId, '');
+  tasks.openEdit({ currentTarget: { dataset: { id: 'starter-4' } } }); await tasks.remove();
+  await budget.refresh();
+  assert.equal(budget.data.expenses.length, 2);
+  assert.ok(budget.data.expenses.every(item => !item.taskId));
+  assert.equal(budget.data.stats.planned, 800030);
+  delete global.wx;
+});
+
 test('invalid input stays in the editor and leaves stored data unchanged', async () => {
   const wx = makeWx(); global.wx = wx;
   const budget = page('budget', wx); await budget.refresh(); budget.openAdd();

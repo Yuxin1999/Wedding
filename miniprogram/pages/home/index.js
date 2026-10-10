@@ -29,7 +29,8 @@ Page({
       return { title: stage.title, done: tasks.length > 0 && tasks.every(task => task.done), count: tasks.filter(task => task.done).length, total: tasks.length, illustration: `/assets/illustrations/${['plant', 'rings', 'letter', 'cake'][index]}.png` };
     });
     const inspirations = domain.CATEGORIES.map(name => ({ name, illustration: categoryIcon(name), count: state.tasks.filter(task => task.category === name && !task.done).length }));
-    this.setData({ ready: true, profile: state.profile, stats, upcoming, dateLabel, countdownLabel, hasDate: stats.daysLeft !== null, countdown: Math.abs(stats.daysLeft || 0), syncLabel: snapshot.syncLabel, stages, inspirations });
+    const paymentReminders = domain.paymentReminders(state);
+    this.setData({ ready: true, profile: state.profile, stats, upcoming, dateLabel, countdownLabel, hasDate: stats.daysLeft !== null, countdown: Math.abs(stats.daysLeft || 0), syncLabel: snapshot.syncLabel, stages, inspirations, paymentReminders: paymentReminders.slice(0, 3), paymentReminderCount: paymentReminders.length });
   },
   async toggle(event) {
     if (this._saving) return;
@@ -43,5 +44,6 @@ Page({
   openTasks() { ui.navigateTab('/pages/tasks/index'); },
   openCategory(event) { wx.setStorageSync('wedding:task-category', event.currentTarget.dataset.category); this.openTasks(); },
   openBudget() { ui.navigateTab('/pages/budget/index'); },
+  openPayment(event) { wx.setStorageSync('wedding:open-expense', event.currentTarget.dataset.id); this.openBudget(); },
   openTogether() { ui.navigateTab('/pages/together/index'); }
 });

@@ -75,6 +75,8 @@ function expense(input, id) {
   return {
     id: text(id, '开支编号', 80, true), title: text(input.title, '开支名称', 60, true),
     category: category(input.category), planned: money(input.planned), paid: money(input.paid),
+    taskId: text(input.taskId === undefined ? '' : input.taskId, '关联事项', 80),
+    paymentDueDate: date(input.paymentDueDate === undefined ? '' : input.paymentDueDate),
     note: text(input.note || '', '开支备注', 300)
   };
 }
@@ -90,7 +92,13 @@ function validateWorkspace(input) {
   for (const items of [result.tasks, result.expenses]) {
     if (new Set(items.map(item => item.id)).size !== items.length) fail('数据包含重复编号');
   }
+  validateLinks(result);
   return result;
+}
+
+function validateLinks(state) {
+  const ids = new Set(state.tasks.map(item => item.id));
+  if (state.expenses.some(item => item.taskId && !ids.has(item.taskId))) fail('关联的事项不存在，请重新选择或取消关联');
 }
 
 function createWorkspace() {
@@ -136,11 +144,37 @@ function applyCommand(current, command, newId) {
     } else {
       const index = state[key].findIndex(item => item.id === payload.id);
       if (index < 0) fail('这条记录已被删除，请刷新', 'NOT_FOUND');
-      if (operation === 'delete') state[key].splice(index, 1);
+      if (operation === 'delete') {
+        state[key].splice(index, 1);
+        if (key === 'tasks') state.expenses.forEach(item => { if (item.taskId === payload.id) item.taskId = ''; });
+      }
       else state[key][index] = validate(Object.assign({}, state[key][index], payload), payload.id);
     }
   }
+  validateLinks(state);
   return state;
+}
+
+function taskBudget(state, taskId) {
+  const items = state.expenses.filter(item => taskId && item.taskId === taskId);
+  const planned = items.reduce((sum, item) => sum + item.planned, 0);
+  const paid = items.reduce((sum, item) => sum + item.paid, 0);
+  return { count: items.length, planned, paid, plannedText: formatMoney(planned), paidText: formatMoney(paid) };
+}
+
+function expenseViews(state, today = todayString()) {
+  return state.expenses.map(item => {
+    const linkedTask = state.tasks.find(task => task.id === item.taskId);
+    const outstanding = Math.max(0, item.planned - item.paid);
+    const paymentDelta = item.paymentDueDate ? dayNumber(item.paymentDueDate) - dayNumber(today) : null;
+    const needsReminder = outstanding > 0 && paymentDelta !== null;
+    const paymentLabel = !outstanding ? '已付清' : paymentDelta === null ? '付款日期待定' : paymentDelta < 0 ? `付款已逾期 ${-paymentDelta} 天` : paymentDelta === 0 ? '今天付款' : `还有 ${paymentDelta} 天付款`;
+    return Object.assign({}, item, { taskTitle: linkedTask ? linkedTask.title : '', outstanding, outstandingText: formatMoney(outstanding), plannedText: formatMoney(item.planned), paidText: formatMoney(item.paid), paymentDelta, needsReminder, paymentOverdue: needsReminder && paymentDelta < 0, paymentLabel });
+  });
+}
+
+function paymentReminders(state, today = todayString()) {
+  return expenseViews(state, today).filter(item => item.needsReminder).sort((a, b) => a.paymentDueDate.localeCompare(b.paymentDueDate));
 }
 
 function dayNumber(value) {
@@ -166,7 +200,7 @@ function taskViews(state, today = todayString()) {
     let dueLabel = due ? due.slice(5).replace('-', '/') : (item.daysBefore !== null ? `婚前 ${item.daysBefore} 天` : '时间待定');
     if (!item.done && delta === 0) dueLabel = '今天到期';
     if (!item.done && delta !== null && delta < 0) dueLabel = `已过期 ${Math.abs(delta)} 天`;
-    return Object.assign({}, item, { due, delta, dueLabel, owner, overdue: !item.done && delta !== null && delta < 0 });
+    return Object.assign({}, item, { due, delta, dueLabel, owner, budget: taskBudget(state, item.id), overdue: !item.done && delta !== null && delta < 0 });
   }).sort((a, b) => Number(a.done) - Number(b.done) || (a.due || '9999').localeCompare(b.due || '9999'));
 }
 
@@ -187,6 +221,6 @@ function summary(state, today = todayString()) {
   };
 }
 
-const weddingDomain = { CATEGORIES, ASSIGNEES, MAX_ITEMS, createWorkspace, validateWorkspace, applyCommand, parseMoney, formatMoney, editMoney, date, deadline, dayNumber, todayString, taskViews, summary, clone };
+const weddingDomain = { CATEGORIES, ASSIGNEES, MAX_ITEMS, createWorkspace, validateWorkspace, applyCommand, parseMoney, formatMoney, editMoney, date, deadline, dayNumber, todayString, taskViews, taskBudget, expenseViews, paymentReminders, summary, clone };
 if (typeof module !== 'undefined' && module.exports) module.exports = weddingDomain;
 else globalThis.WeddingDomain = weddingDomain;

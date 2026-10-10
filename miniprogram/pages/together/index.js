@@ -90,7 +90,7 @@ Page({
     domain.taskViews(state).forEach(item => lines.push(`${item.done ? '✓' : '○'} ${item.title} · ${item.owner} · ${item.due || item.dueLabel}`));
     if (state.expenses.length) {
       lines.push('', '预算明细');
-      state.expenses.forEach(item => lines.push(`${item.title}：预计 ¥${domain.formatMoney(item.planned)} / 已付 ¥${domain.formatMoney(item.paid)}`));
+      domain.expenseViews(state).forEach(item => lines.push(`${item.title}：预计 ¥${item.plannedText} / 已付 ¥${item.paidText}${item.taskTitle ? ' · 安排：' + item.taskTitle : ''}${item.paymentDueDate ? ' · ' + item.paymentDueDate + ' ' + item.paymentLabel : ''}`));
     }
     wx.setClipboardData({ data: lines.join('\n') });
   },

@@ -13,6 +13,7 @@
   ];
   const filters = { status: 'pending', category: '全部', owner: 'all', query: '' };
   let budgetCategory = '全部';
+  let budgetTask = '';
   let storageError = '';
   let snapshot = load();
   let editing = null;
@@ -65,12 +66,18 @@
   function taskRow(task, compact = false) {
     return `<div class="task-row ${task.done ? 'is-done' : ''} ${compact ? 'compact' : ''}">
       <button class="task-toggle" role="checkbox" aria-checked="${task.done}" aria-label="${task.done ? '重新打开' : '完成'}：${esc(task.title)}" data-action="toggle" data-id="${esc(task.id)}"><span aria-hidden="true">${task.done ? '✓' : ''}</span></button>
-      <button class="task-description" data-action="edit-task" data-id="${esc(task.id)}" aria-label="编辑：${esc(task.title)}"><span class="task-name">${esc(task.title)}</span>${!compact && task.note ? `<span class="task-note">${esc(task.note)}</span>` : ''}<span class="task-details"><span class="category-tag">${esc(task.category)}</span><span class="${task.overdue ? 'overdue' : ''}">${esc(task.dueLabel)}</span></span></button>
+      <div class="task-copy"><button class="task-description" data-action="edit-task" data-id="${esc(task.id)}" aria-label="编辑：${esc(task.title)}"><span class="task-name">${esc(task.title)}</span>${!compact && task.note ? `<span class="task-note">${esc(task.note)}</span>` : ''}<span class="task-details"><span class="category-tag">${esc(task.category)}</span><span class="${task.overdue ? 'overdue' : ''}">${esc(task.dueLabel)}</span></span></button>
+      ${!compact ? `<button class="linked-action" data-action="task-budget" data-id="${esc(task.id)}" aria-label="关联预算：${esc(task.title)}">${task.budget.count ? `${task.budget.count} 笔预算 · 预计 ¥ ${task.budget.plannedText} · 已付 ¥ ${task.budget.paidText}` : '＋ 关联预算 / 开支'} ↗</button>` : ''}</div>
       <span class="owner-tag ${task.assignee}">${esc(task.owner)}</span><button class="row-edit" data-action="edit-task" data-id="${esc(task.id)}" aria-label="查看安排：${esc(task.title)}">↗</button>
     </div>`;
   }
   function blank(icon, title, description, action = '') {
     return `<div class="empty-state">${art(icon)}<h3>${title}</h3><p>${description}</p>${action}</div>`;
+  }
+
+  function paymentPanel(items) {
+    if (!items.length) return '';
+    return `<section class="card payment-reminders" aria-label="付款提醒"><div class="section-heading"><h2>付款提醒 · ${items.length} 笔待付</h2><span class="muted">按付款日期排列</span></div>${items.slice(0, 3).map(item => `<button class="payment-reminder" data-action="edit-expense" data-id="${esc(item.id)}"><span><strong>${esc(item.title)}</strong><small>${esc(item.taskTitle || '未关联安排')}</small></span><span class="${item.paymentOverdue ? 'overdue' : ''}">${esc(item.paymentDueDate)} · ${esc(item.paymentLabel)}<small>待付 ¥ ${item.outstandingText} ↗</small></span></button>`).join('')}<p class="field-hint">显示最近 3 笔；其他付款日期可在预算记录中查看。应用内提醒，付清后自动移出，不发送微信消息。</p></section>`;
   }
 
   function home() {
@@ -90,6 +97,7 @@
         <button class="stat-card money-card" data-action="go-budget"><div class="stat-text"><span class="small-label">给每一份心意留位置</span><strong class="budget-value">${profile.totalBudget ? '<small>¥</small>' + stats.budgetText : '预算待商量'}</strong><p>已支付 <b>¥ ${stats.paidText}</b>${stats.overBudget ? ' · 预计超预算' : ''}</p></div>${art('wallet', 'stat-art')}<span class="stat-arrow">↗</span></button>
       </div>
     </section>
+    ${paymentPanel(d.paymentReminders(state))}
     <section class="category-section"><div class="section-heading"><div><h2>把期待，放进小小的抽屉</h2><p>属于你们的婚礼，每个细节都可爱。</p></div><span class="section-caption">A LITTLE BIT OF EVERYTHING</span></div>
       <div class="category-grid">${categories.map(item => `<button class="category-card" data-action="category" data-category="${item.name}">${art(item.icon)}<strong>${item.name}</strong><span>${state.tasks.filter(task => task.category === item.name && !task.done).length} 件待准备 <i>↗</i></span></button>`).join('')}</div>
     </section>
@@ -118,11 +126,16 @@
   function budget() {
     const state = snapshot.workspace, stats = d.summary(state), total = state.profile.totalBudget;
     const groups = categories.map(cat => ({ ...cat, amount: state.expenses.filter(item => item.category === cat.name).reduce((sum, item) => sum + item.planned, 0) }));
-    const items = state.expenses.filter(item => budgetCategory === '全部' || item.category === budgetCategory).slice().reverse();
+    if (budgetTask && !state.tasks.some(task => task.id === budgetTask)) budgetTask = '';
+    const items = d.expenseViews(state).filter(item => (budgetCategory === '全部' || item.category === budgetCategory) && (!budgetTask || item.taskId === budgetTask)).reverse();
+    const linkedBudget = d.taskBudget(state, budgetTask);
     return `${heading('ROOM FOR EVERY WISH', '心意，也有计划', '用喜欢的方式，准备喜欢的婚礼。', '<button class="button primary" data-action="add-expense">＋ 记一笔心意</button>')}
     <section class="budget-overview"><div class="budget-main-card"><div class="section-heading"><span class="small-label">婚礼总预算</span><button class="text-button" data-action="profile">一起调整 ↗</button></div><div class="budget-big">${total ? '<span>¥</span> ' + stats.budgetText : '一起定个小目标'}</div><div class="budget-meter"><div style="width:${stats.budgetPercent}%"></div></div><p>${total ? `${stats.overBudget ? '预计开支已超出总预算，和对方一起商量一下吧。' : `预计开支占预算的 ${stats.budgetPercent}%，每份心意都心中有数。`}` : '预算暂未设置，可以先记下每一笔期待。'}</p>${art('wallet', 'budget-hero-art')}</div><div class="mini-stat">${art('letter')}<span>预计开支</span><strong>¥ ${stats.plannedText}</strong><small>${state.expenses.length} 笔心意，慢慢安排</small></div><div class="mini-stat">${art('gift')}<span>已经支付</span><strong>¥ ${stats.paidText}</strong><small>${total ? `${stats.remaining < 0 ? '已付超预算' : '按已付计算尚余'} ¥ ${stats.remainingText}` : '包含定金与后续付款'}</small></div></section>
+    ${paymentPanel(d.paymentReminders(state).filter(item => !budgetTask || item.taskId === budgetTask))}
     <div class="budget-columns"><section class="card expense-list-card"><div class="section-heading"><h2>每一笔心意</h2><select id="expense-category" aria-label="筛选开支分类">${['全部', ...d.CATEGORIES].map(name => option(name, name, budgetCategory)).join('')}</select></div>
-    ${items.length ? items.map(item => `<button class="expense-row" data-action="edit-expense" data-id="${esc(item.id)}">${art(categories.find(cat => cat.name === item.category).icon)}<span class="expense-info"><strong>${esc(item.title)}</strong><small>${esc(item.category)}${item.note ? ' · ' + esc(item.note) : ''}</small></span><span class="expense-money"><strong>¥ ${d.formatMoney(item.planned)}</strong><small class="${item.paid > item.planned ? 'overdue' : ''}">已付 ¥ ${d.formatMoney(item.paid)}${item.paid > item.planned ? ' · 超预计' : ''}</small></span><span class="muted">↗</span></button>`).join('') : blank('gift', '第一笔心意，从这里开始', '一束花、一件礼服，或一个喜欢的场地。', '<button class="button secondary" data-action="add-expense">＋ 添加一笔开支</button>')}
+    <label class="budget-task-filter">按关联安排查看<select id="expense-task-filter">${option('', '全部安排', budgetTask)}${state.tasks.map(task => option(task.id, task.title, budgetTask)).join('')}</select></label>
+    ${budgetTask ? `<div class="soft-note linked-budget-summary">这件安排共 ${linkedBudget.count} 笔 · 预计 ¥ ${linkedBudget.plannedText} · 已付 ¥ ${linkedBudget.paidText}<button class="text-button" data-action="clear-budget-task">查看全部安排 ↗</button></div>` : ''}
+    ${items.length ? items.map(item => `<article class="expense-entry"><button class="expense-row" data-action="edit-expense" data-id="${esc(item.id)}">${art(categories.find(cat => cat.name === item.category).icon)}<span class="expense-info"><strong>${esc(item.title)}</strong><small>${esc(item.category)}${item.note ? ' · ' + esc(item.note) : ''}</small></span><span class="expense-money"><strong>¥ ${d.formatMoney(item.planned)}</strong><small class="${item.paid > item.planned ? 'overdue' : ''}">已付 ¥ ${d.formatMoney(item.paid)}${item.paid > item.planned ? ' · 超预计' : ''}</small></span><span class="muted">↗</span></button>${item.taskId ? `<button class="linked-action" data-action="edit-task" data-id="${esc(item.taskId)}">关联安排 · ${esc(item.taskTitle)} ↗</button>` : '<p class="expense-detail">未关联安排 · 编辑可绑定</p>'}${item.paymentDueDate ? `<p class="expense-detail ${item.paymentOverdue ? 'overdue' : ''}">${esc(item.paymentDueDate)} · ${esc(item.paymentLabel)}${item.outstanding ? ' · 待付 ¥ ' + item.outstandingText : ''}</p>` : ''}</article>`).join('') : blank('gift', budgetTask ? '给这件安排记一笔预算' : '第一笔心意，从这里开始', budgetTask ? '新增开支会自动关联当前安排。' : '一束花、一件礼服，或一个喜欢的场地。', '<button class="button secondary" data-action="add-expense">＋ 添加一笔开支</button>')}
     </section><aside class="card breakdown-card"><div class="section-heading"><h2>花在哪里</h2><small>按预计开支</small></div><div class="stacked-budget">${groups.map(group => `<span style="width:${stats.planned ? group.amount / stats.planned * 100 : 100 / 6}%;background:${group.color}"></span>`).join('')}</div>${groups.map(group => `<div class="breakdown-row"><span><i style="background:${group.color}"></i>${group.name}</span><b>¥ ${d.formatMoney(group.amount)}</b></div>`).join('')}<div class="budget-note">${art('tea')}<p>不需要最贵的，<br>选你们最喜欢的。</p></div></aside></div>`;
   }
 
@@ -161,8 +174,9 @@
       const t = item || { title: '', category: '其他', assignee: 'both', dueDate: '', daysBefore: null, note: '' }; title = id ? '这件小事的安排' : '记一件小事'; icon = 'checklist';
       fields = `${field('title', '想做什么', t.title, 'required maxlength="60" placeholder="比如：周末一起去看场地"')}${categoryField(t.category)}<fieldset class="form-field"><legend>交给谁来准备</legend><div class="assignee-choices">${[['both', '一起'], ['p1', state.profile.name1], ['p2', state.profile.name2]].map(([key, name]) => `<label><input type="radio" name="assignee" value="${key}" ${t.assignee === key ? 'checked' : ''}><span>${esc(name)}</span></label>`).join('')}</div></fieldset>${field('dueDate', '计划完成日期 · 可选', t.dueDate, 'type="date" min="2000-01-01" max="2100-12-31"')}${t.daysBefore !== null ? `<p class="field-hint">不指定日期时，会安排在婚前 ${t.daysBefore} 天，随婚期一起调整。</p>` : ''}<label class="form-field"><span>想补充的话</span><textarea name="note" maxlength="300" rows="3" placeholder="灵感、要留意的细节，或想和对方说的话…">${esc(t.note)}</textarea></label>`;
     } else {
-      const e = item || { title: '', category: '其他', planned: 0, paid: 0, note: '' }; title = id ? '这笔心意的详情' : '记一笔心意'; icon = 'wallet';
-      fields = `${field('title', '这笔开支叫什么', e.title, 'required maxlength="60" placeholder="比如：婚礼摄影团队"')}${categoryField(e.category)}<div class="form-grid">${field('plannedInput', '预计总金额（元）', d.editMoney(e.planned), 'inputmode="decimal" maxlength="12" placeholder="0.00"')}${field('paidInput', '已付金额（元）', d.editMoney(e.paid), 'inputmode="decimal" maxlength="12" placeholder="0.00"')}</div><label class="form-field"><span>留个小备注</span><textarea name="note" maxlength="300" rows="3" placeholder="套餐内容、尾款时间，或其他需要记住的事…">${esc(e.note)}</textarea></label><p class="field-hint">这里只记账，不会发起支付。已付金额包含定金和后续付款。</p>`;
+      const selectedTask = state.tasks.find(task => task.id === budgetTask);
+      const e = item || { title: '', category: selectedTask ? selectedTask.category : '其他', taskId: budgetTask, paymentDueDate: '', planned: 0, paid: 0, note: '' }; title = id ? '这笔心意的详情' : '记一笔心意'; icon = 'wallet';
+      fields = `${field('title', '这笔开支叫什么', e.title, 'required maxlength="60" placeholder="比如：婚礼摄影团队"')}${categoryField(e.category)}<label class="form-field"><span>关联安排</span><select name="taskId">${option('', '暂不关联安排', e.taskId || '')}${state.tasks.map(task => option(task.id, task.title, e.taskId)).join('')}</select></label><p class="field-hint">一件安排可以关联多笔开支；选择“暂不关联安排”可解除绑定。</p><div class="form-grid">${field('plannedInput', '预计总金额（元）', d.editMoney(e.planned), 'inputmode="decimal" maxlength="12" placeholder="0.00"')}${field('paidInput', '已付金额（元）', d.editMoney(e.paid), 'inputmode="decimal" maxlength="12" placeholder="0.00"')}</div><label class="form-field"><span>留个小备注</span><textarea name="note" maxlength="300" rows="3" placeholder="套餐内容、尾款时间，或其他需要记住的事…">${esc(e.note)}</textarea></label>${field('paymentDueDate', '付款日期（可选）', e.paymentDueDate, 'type="date" min="2000-01-01" max="2100-12-31"')}<p class="field-hint">未付清时在首页和预算页提醒，不发送微信消息。分期付款可拆成定金、尾款两笔，分别填写各期金额和日期。这里只记账，不会发起支付。</p>`;
     }
     document.getElementById('dialog-content').innerHTML = `<div class="dialog-heading">${art(icon)}<div><span class="eyebrow">A LITTLE PLAN FOR US</span><h2 id="dialog-title">${title}</h2></div><button class="close-button" data-action="close-dialog" aria-label="关闭弹窗">×</button></div><form id="edit-form" data-kind="${kind}"><div class="form-body">${fields}<p id="form-error" class="form-error" role="alert" hidden></p></div><div class="dialog-footer">${id ? '<button type="button" class="text-button danger-text" data-action="delete-record">删除这条记录</button>' : '<span class="form-footer-note">慢慢来，好好准备。</span>'}<button type="submit" class="button primary">保存这份安排</button></div></form>`;
     editor.showModal();
@@ -187,7 +201,7 @@
   }
   async function summary() {
     const state = snapshot.workspace, p = state.profile, stats = d.summary(state);
-    const text = [`${p.name1} & ${p.name2} · 一起备婚`, `婚期：${p.weddingDate || '待定'}${p.location ? ' / ' + p.location : ''}`, `进度：${stats.done}/${stats.total}，总预算：${p.totalBudget ? '¥ ' + stats.budgetText : '待定'}`, `预计开支：¥ ${stats.plannedText}，已付：¥ ${stats.paidText}`, '', '备婚清单', ...d.taskViews(state).map(task => `${task.done ? '✓' : '○'} ${task.title} · ${task.owner} · ${task.due || task.dueLabel}`), '', '每一笔心意', ...state.expenses.map(e => `${e.title}：预计 ¥ ${d.formatMoney(e.planned)} / 已付 ¥ ${d.formatMoney(e.paid)}`)].join('\n');
+    const text = [`${p.name1} & ${p.name2} · 一起备婚`, `婚期：${p.weddingDate || '待定'}${p.location ? ' / ' + p.location : ''}`, `进度：${stats.done}/${stats.total}，总预算：${p.totalBudget ? '¥ ' + stats.budgetText : '待定'}`, `预计开支：¥ ${stats.plannedText}，已付：¥ ${stats.paidText}`, '', '备婚清单', ...d.taskViews(state).map(task => `${task.done ? '✓' : '○'} ${task.title} · ${task.owner} · ${task.due || task.dueLabel}`), '', '每一笔心意', ...d.expenseViews(state).map(e => `${e.title}：预计 ¥ ${e.plannedText} / 已付 ¥ ${e.paidText}${e.taskTitle ? ' · 安排：' + e.taskTitle : ''}${e.paymentDueDate ? ' · ' + e.paymentDueDate + ' ' + e.paymentLabel : ''}`)].join('\n');
     try { await navigator.clipboard.writeText(text); toast('备婚摘要已复制，亲手分享给对方吧。'); }
     catch (_) { info('收好你们的备婚摘要', `<p>浏览器未允许自动复制，可以在下面选中后复制。</p><textarea class="summary-text" readonly aria-label="备婚摘要">${esc(text)}</textarea>`); }
   }
@@ -212,7 +226,7 @@
       let type, payload;
       if (editing.kind === 'profile') { type = 'updateProfile'; payload = { name1: form.name1, name2: form.name2, weddingDate: form.weddingDate, location: form.location, totalBudget: d.parseMoney(form.budgetInput) }; }
       else if (editing.kind === 'task') { type = editing.id ? 'updateTask' : 'addTask'; payload = { title: form.title, category: form.category, assignee: form.assignee, dueDate: form.dueDate, daysBefore: editing.original ? editing.original.daysBefore : null, done: editing.original ? editing.original.done : false, note: form.note }; }
-      else { type = editing.id ? 'updateExpense' : 'addExpense'; payload = { title: form.title, category: form.category, planned: d.parseMoney(form.plannedInput), paid: d.parseMoney(form.paidInput), note: form.note }; }
+      else { type = editing.id ? 'updateExpense' : 'addExpense'; payload = { title: form.title, category: form.category, taskId: form.taskId, paymentDueDate: form.paymentDueDate, planned: d.parseMoney(form.plannedInput), paid: d.parseMoney(form.paidInput), note: form.note }; }
       if (editing.id) payload.id = editing.id;
       commit(type, payload, editing.revision); editor.close(); toast('已记下这份安排。');
     } catch (error) {
@@ -227,6 +241,8 @@
       if (action === 'profile') openForm('profile');
       else if (action === 'add-task') openForm('task');
       else if (action === 'edit-task') openForm('task', target.dataset.id);
+      else if (action === 'task-budget') { budgetTask = target.dataset.id; budgetCategory = '全部'; go('budget'); }
+      else if (action === 'clear-budget-task') { budgetTask = ''; budgetCategory = '全部'; render(); }
       else if (action === 'add-expense') openForm('expense');
       else if (action === 'edit-expense') openForm('expense', target.dataset.id);
       else if (action === 'close-dialog') editor.close();
@@ -236,7 +252,7 @@
       else if (action === 'filter-category') { filters.category = target.dataset.category; render(); }
       else if (action === 'category') { filters.category = target.dataset.category; filters.status = 'pending'; filters.query = ''; filters.owner = 'all'; go('tasks'); }
       else if (action === 'delete-record') {
-        if (editing && await confirm('要和这条记录说再见吗？', '删除后无法撤销，相关进度或预算会重新计算。', '确认删除')) { commit(editing.kind === 'task' ? 'deleteTask' : 'deleteExpense', { id: editing.id }, editing.revision); editor.close(); toast('记录已删除。'); }
+        if (editing && await confirm('要和这条记录说再见吗？', editing.kind === 'task' ? '删除后无法撤销。关联开支会保留在预算中，只解除与这件安排的关联。' : '删除后无法撤销，预算会重新计算。', '确认删除')) { commit(editing.kind === 'task' ? 'deleteTask' : 'deleteExpense', { id: editing.id }, editing.revision); editor.close(); toast('记录已删除。'); }
       }
       else if (action === 'summary') await summary();
       else if (action === 'export') download();
@@ -253,6 +269,7 @@
   document.addEventListener('input', event => { if (event.target.id === 'task-search') { filters.query = event.target.value; document.getElementById('task-list').innerHTML = taskList(); } });
   document.addEventListener('change', async event => {
     if (event.target.id === 'owner-filter') { filters.owner = event.target.value; document.getElementById('task-list').innerHTML = taskList(); }
+    else if (event.target.id === 'expense-task-filter') { budgetTask = event.target.value; budgetCategory = '全部'; render(); }
     else if (event.target.id === 'expense-category') { budgetCategory = event.target.value; render(); }
     else if (event.target.id === 'import-file') {
       const file = event.target.files[0]; if (!file) return;
@@ -267,6 +284,7 @@
   });
   editor.addEventListener('click', event => { if (event.target === editor) { const rect = editor.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) editor.close(); } });
   window.addEventListener('hashchange', () => { render(); window.scrollTo({ top: 0, behavior: 'instant' }); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { snapshot = load(); render(); } });
   window.addEventListener('storage', event => { if (event.key === KEY) { snapshot = load(); render(); toast('另一个页面的更新，已经收到。'); } });
   document.getElementById('today').textContent = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }).format(new Date());
   render();

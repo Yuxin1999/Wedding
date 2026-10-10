@@ -22,8 +22,8 @@
 .legend-dot { width: 10rpx; height: 10rpx; border-radius: 50%; margin-right: 10rpx; flex-shrink: 0; }
 .expense-filters { white-space: nowrap; margin-bottom: 20rpx; }
 .expense-filter-inner { display: inline-flex; gap: 14rpx; padding: 4rpx 2rpx 10rpx; }
-.expense-filter { color: #8d967d; padding: 9rpx 20rpx; border: 1rpx solid #e1e5d5; font-size: 23rpx; border-radius: 40rpx; }
-.expense-filter.active { background: #e6ecdb; color: #506544; border-color: #d7dfc6; }
+button[class].expense-filter { width: auto; min-width: 0; flex: 0 0 auto; margin: 0; color: #8d967d; padding: 9rpx 20rpx; border: 1rpx solid #e1e5d5; font-size: 23rpx; border-radius: 40rpx; }
+button.expense-filter.active { background: #e6ecdb; color: #506544; border-color: #d7dfc6; }
 .expense-card { margin-bottom: 22rpx; }
 .expense-name { font-size: 28rpx; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .expense-amount { max-width: 48%; font-size: 30rpx; font-family: Georgia, serif; text-align: right; overflow-wrap: anywhere; }

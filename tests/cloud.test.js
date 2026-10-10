@@ -96,6 +96,20 @@ test('a user cannot join two spaces or overwrite an existing space by reconnecti
   assert.deepEqual(reconnected.workspace, other.workspace);
 });
 
+test('linked budgets and reminders synchronize, while stale or invalid associations cannot corrupt the workspace', async () => {
+  const ctx = setup(); const { joined } = await couple(ctx);
+  const saved = await ctx.execute('alice', { action: 'command', revision: joined.revision, command: { type: 'addExpense', payload: { title: '定金', category: '摄影摄像', planned: 200000, paid: 0, note: '', taskId: 'starter-4', paymentDueDate: '2028-05-01' } } });
+  const expense = saved.workspace.expenses[0];
+  const partner = await ctx.execute('bob', { action: 'status' });
+  assert.equal(partner.workspace.expenses[0].paymentDueDate, '2028-05-01');
+  await assert.rejects(ctx.execute('bob', { action: 'command', revision: saved.revision, command: { type: 'updateExpense', payload: { id: expense.id, taskId: 'foreign-task-id' } } }), { code: 'VALIDATION' });
+  assert.equal((await ctx.execute('bob', { action: 'status' })).revision, saved.revision);
+  const deleted = await ctx.execute('bob', { action: 'command', revision: saved.revision, command: { type: 'deleteTask', payload: { id: 'starter-4' } } });
+  assert.equal(deleted.workspace.expenses[0].taskId, '');
+  assert.equal(deleted.workspace.expenses[0].planned, 200000);
+  await assert.rejects(ctx.execute('alice', { action: 'command', revision: saved.revision, command: { type: 'updateExpense', payload: { id: expense.id, taskId: 'starter-4' } } }), { code: 'CONFLICT' });
+});
+
 test('invalid updates roll back without advancing revision', async () => {
   const ctx = setup(); const { joined } = await couple(ctx);
   await assert.rejects(ctx.execute('alice', { action: 'command', revision: joined.revision, command: { type: 'updateProfile', payload: { name1: 'Alice', name2: 'Bob', totalBudget: -1, weddingDate: '', location: '' } } }), { code: 'VALIDATION' });

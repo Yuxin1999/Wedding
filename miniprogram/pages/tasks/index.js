@@ -11,11 +11,20 @@ Page({
     editor: false, saving: false, form: {}, tasks: []
   },
   onHide() { this.setData({ pageVisible: false }); },
-  onShow() {
+  async onShow() {
     this.setData({ pageVisible: true });
     const category = wx.getStorageSync('wedding:task-category');
     if (domain.CATEGORIES.includes(category)) { this.setData({ category, filter: 'pending', ownerIndex: 0, query: '' }); wx.setStorageSync('wedding:task-category', ''); }
-    this.refresh();
+    await this.refresh();
+    const taskId = wx.getStorageSync('wedding:open-task');
+    if (taskId && this._snapshot) {
+      wx.setStorageSync('wedding:open-task', '');
+      const item = this._snapshot.workspace.tasks.find(task => task.id === taskId);
+      if (item) {
+        this.setData({ category: '全部', filter: 'all', ownerIndex: 0, query: '' }); this.filterTasks();
+        this.openEdit({ currentTarget: { dataset: { id: taskId } } });
+      } else ui.error(new Error('这件安排已被删除'));
+    }
   },
   async onPullDownRefresh() { await this.refresh(); wx.stopPullDownRefresh(); },
   async refresh() {
@@ -50,11 +59,15 @@ Page({
     this._editorRevision = this._snapshot.revision;
     this.setData({ editor: true, editingId: '', form: { title: '', category: domain.CATEGORIES[0], assignee: 'both', dueDate: '', daysBefore: null, done: false, note: '' }, formCategoryIndex: 0 });
   },
+  openBudget(event) {
+    wx.setStorageSync('wedding:budget-task', event.currentTarget.dataset.id);
+    ui.navigateTab('/pages/budget/index');
+  },
   openEdit(event) {
     const item = this._snapshot.workspace.tasks.find(task => task.id === event.currentTarget.dataset.id);
     if (!item) return;
     this._editorRevision = this._snapshot.revision;
-    this.setData({ editor: true, editingId: item.id, form: Object.assign({}, item), formCategoryIndex: domain.CATEGORIES.indexOf(item.category) });
+    this.setData({ editor: true, editingId: item.id, form: Object.assign({}, item), linkedBudget: domain.taskBudget(this._snapshot.workspace, item.id), formCategoryIndex: domain.CATEGORIES.indexOf(item.category) });
   },
   closeEditor() { if (!this.data.saving) this.setData({ editor: false }); },
   field(event) { ui.field(this, event); },
@@ -86,7 +99,7 @@ Page({
     finally { this._toggling = false; }
   },
   async remove() {
-    if (this.data.saving || !await ui.confirm('删除这项任务？', '删除后无法撤销，已完成的任务也可以留作纪念。')) return;
+    if (this.data.saving || !await ui.confirm('删除这项任务？', '删除后无法撤销。关联开支会保留在预算中，只解除与这件安排的关联。')) return;
     this.setData({ saving: true });
     try {
       this.render(await store.mutate({ type: 'deleteTask', payload: { id: this.data.editingId } }, this._editorRevision));

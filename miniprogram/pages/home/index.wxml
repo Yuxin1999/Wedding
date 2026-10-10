@@ -43,6 +43,11 @@
         <view wx:if="{{!upcoming.length}}" class="empty"><view class="empty-title">准备好的，都是幸福</view><view class="empty-copy">清单已完成，给彼此一个拥抱吧。</view><button class="pressable text-link" bindtap="openTasks" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">再记一件小事 ›</button></view>
       </view>
     </view>
+    <view wx:if="{{paymentReminderCount}}" class="enter-block enter-last section card payment-list">
+      <view class="between section-head"><text class="section-title">别忘了这几笔心意</text><button class="text-link" bindtap="openBudget">预算 ›</button></view>
+      <button wx:for="{{paymentReminders}}" wx:key="id" class="pressable payment-row" data-id="{{item.id}}" bindtap="openPayment" hover-class="is-pressed"><view>{{item.title}} · 待付 ¥{{item.outstandingText}}</view><view class="reminder-meta {{item.paymentOverdue ? 'overdue' : ''}}">{{item.paymentDueDate}} · {{item.paymentLabel}} ›</view><view wx:if="{{item.taskTitle}}" class="reminder-meta">{{item.taskTitle}}</view></button>
+      <view class="field-hint">共 {{paymentReminderCount}} 笔付款提醒 · 打开应用时更新</view>
+    </view>
     <view class="enter-block enter-last section journey card">
       <image class="journey-illustration" src="/assets/illustrations/plant.png" mode="aspectFit" />
       <view class="eyebrow">ONE STEP AT A TIME</view><view class="journey-title">把期待，一点点变成现实</view>

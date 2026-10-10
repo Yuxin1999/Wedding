@@ -112,8 +112,68 @@ fs.mkdirSync(output, { recursive: true });
     await mobile.getByRole('button', { name: '保存这份安排', exact: true }).click();
     assert.match(await mobile.locator('.couple-poster').textContent(), /手机测试/);
     await mobile.reload({ waitUntil: 'networkidle' }); assert.match(await mobile.locator('.couple-poster').textContent(), /手机测试/);
+    // Linked installments: real navigation and forms on a touch-sized viewport.
+    await mobile.locator('[data-nav="tasks"]').click();
+    await mobile.getByRole('button', { name: '关联预算：挑选摄影与摄像团队', exact: true }).click();
+    assert.equal(await mobile.locator('#expense-task-filter').inputValue(), 'starter-4');
+    const paymentDate = await mobile.evaluate(() => window.WeddingDomain.todayString());
+    async function installment(title, planned, paid) {
+      await mobile.locator('.page-heading').getByRole('button', { name: '＋ 记一笔心意', exact: true }).click();
+      assert.equal(await mobile.getByRole('combobox', { name: '关联安排', exact: true }).inputValue(), 'starter-4');
+      await mobile.getByLabel('这笔开支叫什么', { exact: true }).fill(title);
+      await mobile.getByLabel('预计总金额（元）', { exact: true }).fill(planned);
+      await mobile.getByLabel('已付金额（元）', { exact: true }).fill(paid);
+      await mobile.getByLabel('付款日期（可选）', { exact: true }).fill(paymentDate);
+      await mobile.getByRole('button', { name: '保存这份安排', exact: true }).click();
+      await mobile.waitForFunction(() => !document.getElementById('editor').open);
+    }
+    await installment('摄影定金', '2000.10', '1000.05');
+    await installment('摄影尾款', '6000.20', '0');
+    assert.match(await mobile.locator('.linked-budget-summary').textContent(), /8,000.30/);
+    assert.equal(await mobile.locator('.payment-reminder').count(), 2);
+    assert.match(await mobile.locator('.payment-reminders').textContent(), /今天付款/);
+    await mobile.screenshot({ path: path.join(output, 'mobile-linked-budget.png'), fullPage: true });
+    assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Linked budget horizontal overflow');
+    await mobile.locator('.expense-entry .linked-action').first().click();
+    await mobile.getByLabel('想做什么', { exact: true }).fill('摄影团队 <一起>');
+    await mobile.getByRole('button', { name: '保存这份安排', exact: true }).click();
+    assert.match(await mobile.locator('.expense-entry').first().textContent(), /摄影团队 <一起>/);
+
+    await mobile.locator('[data-nav="together"]').click();
+    const linkedDownloadEvent = mobile.waitForEvent('download');
+    await mobile.getByRole('button', { name: /收好一份备份/ }).click();
+    const linkedDownload = await linkedDownloadEvent;
+    const linkedBackupText = fs.readFileSync(await linkedDownload.path(), 'utf8');
+    const linkedBackup = JSON.parse(linkedBackupText);
+    assert.equal(linkedBackup.workspace.expenses[0].taskId, 'starter-4');
+    assert.equal(linkedBackup.workspace.expenses[0].paymentDueDate, paymentDate);
+    await mobile.locator('#import-file').setInputFiles({ name: 'linked.json', mimeType: 'application/json', buffer: Buffer.from(linkedBackupText) });
+    await mobile.getByRole('button', { name: '确认导入', exact: true }).click();
+    await mobile.reload({ waitUntil: 'networkidle' });
+    await mobile.locator('[data-nav="home"]').click();
+    await mobile.getByRole('heading', { name: '我们的备婚手账', exact: true }).waitFor();
+    assert.equal(await mobile.locator('.payment-reminder').count(), 2);
+    await mobile.locator('.payment-reminder').filter({ hasText: '摄影定金' }).click();
+    await mobile.getByLabel('已付金额（元）', { exact: true }).fill('2000.10');
+    await mobile.getByRole('button', { name: '保存这份安排', exact: true }).click();
+    assert.equal(await mobile.locator('.payment-reminder').count(), 1);
+
+    await mobile.locator('[data-nav="budget"]').click();
+    await mobile.locator('.expense-entry').filter({ hasText: '摄影定金' }).locator('.expense-row').click();
+    await mobile.getByRole('combobox', { name: '关联安排', exact: true }).selectOption('');
+    await mobile.getByRole('button', { name: '保存这份安排', exact: true }).click();
+    assert.match(await mobile.locator('.expense-entry').filter({ hasText: '摄影定金' }).textContent(), /未关联安排/);
+    await mobile.locator('.expense-entry .linked-action').click();
+    await mobile.getByRole('button', { name: '删除这条记录', exact: true }).click();
+    assert.match(await mobile.locator('#confirm-copy').textContent(), /关联开支会保留/);
+    await mobile.getByRole('button', { name: '确认删除', exact: true }).click();
+    assert.equal(await mobile.locator('.expense-entry').count(), 2);
+    assert.equal(await mobile.locator('.expense-entry .linked-action').count(), 0);
+    assert.equal(await mobile.locator('.payment-reminder').count(), 1);
+    assert.match(await mobile.locator('.mini-stat').first().textContent(), /8,000.30/);
     assert.deepEqual(errors, []);
     console.log('Browser checks passed: desktop/mobile navigation, profile/date, task edit/assignment/completion/filtering, budget precision, invalid input, reload persistence, backup export, invalid import preservation, 20-icon gallery, cross-tab conflict and no runtime errors.');
     console.log(`Screenshots: ${output}`);
+    console.log('Linked budget checks passed: task navigation, installment defaults/totals, renaming, backup round-trip, payment-date reminders, paying in full, unbinding and retaining expenses after task deletion.');
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => { console.error(error); process.exitCode = 1; server.closeAllConnections(); server.close(); });
