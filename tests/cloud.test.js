@@ -110,6 +110,19 @@ test('linked budgets and reminders synchronize, while stale or invalid associati
   await assert.rejects(ctx.execute('alice', { action: 'command', revision: saved.revision, command: { type: 'updateExpense', payload: { id: expense.id, taskId: 'starter-4' } } }), { code: 'CONFLICT' });
 });
 
+test('custom categories sync to both partners and stale edits cannot undo a rename', async () => {
+  const ctx = setup(); const { joined } = await couple(ctx);
+  const added = await ctx.execute('alice', { action: 'command', revision: joined.revision, command: { type: 'addCategory', payload: { name: '蜜月旅行', icon: 'car' } } });
+  const category = added.workspace.categories.at(-1);
+  const partner = await ctx.execute('bob', { action: 'status' });
+  assert.deepEqual(partner.workspace.categories.at(-1), category);
+  const renamed = await ctx.execute('bob', { action: 'command', revision: partner.revision, command: { type: 'updateCategory', payload: { id: category.id, name: '我们的蜜月', icon: 'heart' } } });
+  await assert.rejects(ctx.execute('alice', { action: 'command', revision: added.revision, command: { type: 'updateCategory', payload: { id: category.id, name: '旧名字' } } }), { code: 'CONFLICT' });
+  await assert.rejects(ctx.execute('alice', { action: 'command', revision: renamed.revision, command: { type: 'deleteCategory', payload: { id: renamed.workspace.categories[0].id } } }), { code: 'VALIDATION' });
+  const latest = await ctx.execute('alice', { action: 'status' });
+  assert.equal(latest.workspace.categories.at(-1).name, '我们的蜜月'); assert.equal(latest.revision, renamed.revision);
+});
+
 test('invalid updates roll back without advancing revision', async () => {
   const ctx = setup(); const { joined } = await couple(ctx);
   await assert.rejects(ctx.execute('alice', { action: 'command', revision: joined.revision, command: { type: 'updateProfile', payload: { name1: 'Alice', name2: 'Bob', totalBudget: -1, weddingDate: '', location: '' } } }), { code: 'VALIDATION' });

@@ -1,0 +1,86 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+module.exports = async function checkCategories(page, output) {
+  await page.locator('[data-nav="home"]').click();
+  await page.getByRole('heading', { name: '我们的备婚分类', exact: true }).waitFor();
+  await page.getByRole('button', { name: '＋ 新增分类', exact: true }).click();
+  await page.getByLabel('分类名称', { exact: true }).fill('蜜月旅行');
+  await page.locator('.category-icon-option:has(input[value="car"])').click();
+  assert.equal(await page.locator('input[name="icon"]:checked').inputValue(), 'car');
+  assert.equal(await page.locator('.category-icon-option').count(), 20);
+  await page.screenshot({ path: path.join(output, 'mobile-category-editor.png'), fullPage: true });
+  await page.getByRole('button', { name: '保存分类', exact: true }).click();
+  assert.equal(await page.locator('.category-manage-row').count(), 7);
+  await page.locator('#editor').getByRole('button', { name: '＋ 新增分类', exact: true }).click();
+  await page.getByLabel('分类名称', { exact: true }).fill('蜜月旅行');
+  await page.getByRole('button', { name: '保存分类', exact: true }).click();
+  assert.match(await page.locator('#form-error').textContent(), /已经存在/);
+  await page.getByLabel('分类名称', { exact: true }).fill('<b>蜜月</b>');
+  await page.getByRole('button', { name: '保存分类', exact: true }).click();
+  const literal = page.locator('.category-manage-row').filter({ hasText: '<b>蜜月</b>' });
+  assert.equal(await literal.locator('strong b').count(), 0, 'Category names must be escaped');
+  await literal.click();
+  await page.getByRole('button', { name: '删除空分类', exact: true }).click();
+  await page.getByRole('button', { name: '确认删除', exact: true }).click();
+  assert.equal(await page.locator('.category-manage-row').count(), 7);
+  await page.getByRole('button', { name: '关闭弹窗', exact: true }).click();
+
+  await page.locator('.category-card').filter({ hasText: '蜜月旅行' }).click();
+  await page.locator('.page-heading').getByRole('button', { name: '＋ 记一件小事', exact: true }).click();
+  assert.equal(await page.getByRole('combobox', { name: '收进哪个小抽屉', exact: true }).inputValue(), '蜜月旅行');
+  await page.getByLabel('想做什么', { exact: true }).fill('预订蜜月机票');
+  await page.getByRole('button', { name: '保存这份安排', exact: true }).click();
+  await page.getByRole('button', { name: '关联预算：预订蜜月机票', exact: true }).click();
+  await page.locator('.page-heading').getByRole('button', { name: '＋ 记一笔心意', exact: true }).click();
+  assert.equal(await page.getByRole('combobox', { name: '收进哪个小抽屉', exact: true }).inputValue(), '蜜月旅行');
+  await page.getByLabel('这笔开支叫什么', { exact: true }).fill('机票订金');
+  await page.getByLabel('预计总金额（元）', { exact: true }).fill('1000.20');
+  await page.getByLabel('付款日期（可选）', { exact: true }).fill('2028-05-01');
+  await page.getByRole('button', { name: '保存这份安排', exact: true }).click();
+
+  await page.locator('[data-nav="home"]').click();
+  await page.getByRole('button', { name: '管理分类 ›', exact: true }).click();
+  await page.locator('.category-manage-row').filter({ hasText: '蜜月旅行' }).click();
+  assert.equal(await page.getByRole('button', { name: '删除空分类', exact: true }).count(), 0);
+  const longName = '婚礼当天亲友接送车辆安排';
+  await page.getByLabel('分类名称', { exact: true }).fill(longName);
+  await page.locator('.category-icon-option:has(input[value="heart"])').click();
+  await page.getByRole('button', { name: '保存分类', exact: true }).click();
+  await page.getByRole('button', { name: '关闭弹窗', exact: true }).click();
+  await page.reload({ waitUntil: 'networkidle' });
+  const card = page.locator('.category-card').filter({ hasText: longName });
+  assert.match(await card.locator('img').getAttribute('src'), /heart.svg$/);
+  for (const width of [320, 375, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    const boxes = await page.locator('.category-card').evaluateAll(items => items.map(item => item.getBoundingClientRect().toJSON()));
+    assert(Math.abs(boxes[0].y - boxes[1].y) < 1 && boxes[2].y > boxes[0].y, 'Phone home must show two category columns');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  }
+  await page.screenshot({ path: path.join(output, 'mobile-custom-categories.png'), fullPage: true });
+  await card.click();
+  await page.getByRole('button', { name: '编辑：预订蜜月机票', exact: true }).waitFor();
+  assert.equal(await page.locator('.category-tag').textContent(), longName);
+  await page.getByRole('button', { name: '关联预算：预订蜜月机票', exact: true }).click();
+  await page.locator('.expense-entry').waitFor();
+  assert.match(await page.locator('.expense-entry').textContent(), /机票订金/);
+  assert.match(await page.locator('.expense-entry img').getAttribute('src'), /heart.svg$/);
+  assert.match(await page.locator('.expense-entry').textContent(), /2028-05-01/);
+  assert.equal(await page.getByLabel('筛选开支分类', { exact: true }).locator('option').filter({ hasText: longName }).count(), 1);
+  await page.locator('[data-nav="together"]').click();
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: /收好一份备份/ }).click();
+  const backup = JSON.parse(fs.readFileSync(await (await downloaded).path(), 'utf8'));
+  assert.equal(backup.workspace.categories.at(-1).name, longName);
+  assert.equal(backup.workspace.categories.at(-1).icon, 'heart');
+  assert.equal(backup.workspace.tasks.at(-1).category, longName);
+  assert.equal(backup.workspace.expenses.at(-1).category, longName);
+  // Exercise the actual import path, including the saved category metadata.
+  await page.locator('#import-file').setInputFiles({ name: 'custom-categories.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  await page.getByRole('button', { name: '确认导入', exact: true }).click();
+  await page.locator('[data-nav="home"]').click();
+  await page.locator('.category-card').filter({ hasText: longName }).waitFor();
+  assert.equal(await page.locator('.category-card').count(), 7);
+  console.log('Custom category browser checks passed: create, 20-icon selection, duplicates, escaped names, safe deletion, task/budget integration, rename, reload, backup import/export and 320/375/430px two-column layout.');
+};

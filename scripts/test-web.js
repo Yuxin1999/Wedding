@@ -171,6 +171,7 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await mobile.locator('.expense-entry .linked-action').count(), 0);
     assert.equal(await mobile.locator('.payment-reminder').count(), 1);
     assert.match(await mobile.locator('.mini-stat').first().textContent(), /8,000.30/);
+    await require('./check-web-categories')(mobile, output);
     assert.deepEqual(errors, []);
     console.log('Browser checks passed: desktop/mobile navigation, profile/date, task edit/assignment/completion/filtering, budget precision, invalid input, reload persistence, backup export, invalid import preservation, 20-icon gallery, cross-tab conflict and no runtime errors.');
     console.log(`Screenshots: ${output}`);

@@ -1,5 +1,14 @@
 /* Pure shared model. Run npm run prepare after editing this file. Money is stored in cents. */
 const CATEGORIES = ['场地宴席', '婚纱造型', '摄影摄像', '仪式布置', '宾客礼品', '其他'];
+const CATEGORY_ICONS = [
+  ['rings', '约定'], ['calendar', '好日子'], ['checklist', '小事清单'], ['wallet', '心意预算'],
+  ['venue', '场地宴席'], ['dress', '婚纱造型'], ['camera', '摄影摄像'], ['flower', '仪式花艺'],
+  ['gift', '宾客礼品'], ['letter', '邀请与心意'], ['cake', '甜蜜仪式'], ['music', '婚礼音乐'],
+  ['bow', '小小装饰'], ['tea', '休息一下'], ['suit', '礼服与领结'], ['heart', '两个人'],
+  ['sparkles', '灵感碎片'], ['plant', '慢慢生长'], ['car', '出发去幸福'], ['couple', '两个人的婚礼']
+].map(([id, title]) => ({ id, title }));
+const DEFAULT_CATEGORIES = CATEGORIES.map((name, index) => ({ id: `category-${index + 1}`, name, icon: ['venue', 'dress', 'camera', 'flower', 'gift', 'rings'][index] }));
+const MAX_CATEGORIES = 24;
 const ASSIGNEES = ['both', 'p1', 'p2'];
 const MAX_ITEMS = 300;
 const MAX_MONEY = 10000000000;
@@ -46,7 +55,22 @@ function formatMoney(cents) {
 
 function editMoney(cents) { return cents ? String(cents / 100) : ''; }
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
-function category(value) { if (!CATEGORIES.includes(value)) fail('请选择有效分类'); return value; }
+function getCategories(state) { return state.categories || DEFAULT_CATEGORIES; }
+function categoryIconId(state, name) { const item = getCategories(state).find(item => item.name === name); return item ? item.icon : 'rings'; }
+function category(value, categories) { if (!categories.some(item => item.name === value)) fail('请选择有效分类'); return value; }
+function categoryEntry(input, id) {
+  const name = text(input.name, '分类名称', 12, true);
+  if (name === '全部') fail('“全部”用于筛选，请换一个分类名称');
+  if (!CATEGORY_ICONS.some(item => item.id === input.icon)) fail('请选择一个可用图标');
+  return { id: text(id, '分类编号', 80, true), name, icon: input.icon };
+}
+function validateCategories(input) {
+  if (!Array.isArray(input) || !input.length || input.length > MAX_CATEGORIES) fail('请保留 1 至 24 个分类');
+  const result = input.map(item => categoryEntry(item, item.id));
+  if (new Set(result.map(item => item.name)).size !== result.length) fail('这个分类名称已经存在');
+  if (new Set(result.map(item => item.id)).size !== result.length) fail('分类编号重复');
+  return result;
+}
 function assignee(value) { if (!ASSIGNEES.includes(value)) fail('请选择负责人'); return value; }
 
 function profile(input) {
@@ -59,22 +83,22 @@ function profile(input) {
   };
 }
 
-function task(input, id) {
+function task(input, id, categories) {
   if (typeof input.done !== 'boolean') fail('任务状态不正确');
   const daysBefore = input.daysBefore === undefined ? null : input.daysBefore;
   if (daysBefore !== null && (!Number.isInteger(daysBefore) || daysBefore < 0 || daysBefore > 1000)) fail('任务时间不正确');
   return {
     id: text(id, '任务编号', 80, true), title: text(input.title, '任务名称', 60, true),
-    category: category(input.category), assignee: assignee(input.assignee),
+    category: category(input.category, categories), assignee: assignee(input.assignee),
     dueDate: date(input.dueDate), daysBefore, done: input.done,
     note: text(input.note || '', '任务备注', 300)
   };
 }
 
-function expense(input, id) {
+function expense(input, id, categories) {
   return {
     id: text(id, '开支编号', 80, true), title: text(input.title, '开支名称', 60, true),
-    category: category(input.category), planned: money(input.planned), paid: money(input.paid),
+    category: category(input.category, categories), planned: money(input.planned), paid: money(input.paid),
     taskId: text(input.taskId === undefined ? '' : input.taskId, '关联事项', 80),
     paymentDueDate: date(input.paymentDueDate === undefined ? '' : input.paymentDueDate),
     note: text(input.note || '', '开支备注', 300)
@@ -84,10 +108,12 @@ function expense(input, id) {
 function validateWorkspace(input) {
   if (!input || input.schemaVersion !== 1 || !Array.isArray(input.tasks) || !Array.isArray(input.expenses)) fail('数据格式不兼容，请保留原数据并更新小程序');
   if (input.tasks.length > MAX_ITEMS || input.expenses.length > MAX_ITEMS) fail('任务和开支分别最多 300 条');
+  // Older local saves, cloud spaces and backups did not contain a category list.
+  const categories = validateCategories(input.categories === undefined ? DEFAULT_CATEGORIES : input.categories);
   const result = {
-    schemaVersion: 1, profile: profile(input.profile || {}),
-    tasks: input.tasks.map(item => task(item, item.id)),
-    expenses: input.expenses.map(item => expense(item, item.id))
+    schemaVersion: 1, profile: profile(input.profile || {}), categories,
+    tasks: input.tasks.map(item => task(item, item.id, categories)),
+    expenses: input.expenses.map(item => expense(item, item.id, categories))
   };
   for (const items of [result.tasks, result.expenses]) {
     if (new Set(items.map(item => item.id)).size !== items.length) fail('数据包含重复编号');
@@ -118,6 +144,7 @@ function createWorkspace() {
   ];
   return {
     schemaVersion: 1,
+    categories: clone(DEFAULT_CATEGORIES),
     profile: { name1: '我', name2: 'TA', weddingDate: '', totalBudget: 0, location: '' },
     tasks: seeds.map((item, index) => ({ id: `starter-${index + 1}`, title: item[0], category: item[1], daysBefore: item[2], assignee: item[3], dueDate: '', done: false, note: '' })),
     expenses: []
@@ -129,6 +156,23 @@ function applyCommand(current, command, newId) {
   if (!command || typeof command !== 'object') fail('无效操作');
   const payload = command.payload || {};
   if (command.type === 'updateProfile') state.profile = profile(payload);
+  else if (['addCategory', 'updateCategory', 'deleteCategory'].includes(command.type)) {
+    if (command.type === 'addCategory') {
+      state.categories.push(categoryEntry(payload, newId));
+    } else {
+      const index = state.categories.findIndex(item => item.id === payload.id);
+      if (index < 0) fail('这个分类已被删除，请刷新', 'NOT_FOUND');
+      const previous = state.categories[index];
+      if (command.type === 'deleteCategory') {
+        if (state.tasks.concat(state.expenses).some(item => item.category === previous.name)) fail('请先把此分类下的事项和开支移到其他分类');
+        state.categories.splice(index, 1);
+      } else {
+        const next = categoryEntry(Object.assign({}, previous, payload), previous.id);
+        state.categories[index] = next;
+        state.tasks.concat(state.expenses).forEach(item => { if (item.category === previous.name) item.category = next.name; });
+      }
+    }
+  }
   else {
     const operations = {
       addTask: ['tasks', 'add', task], updateTask: ['tasks', 'update', task], deleteTask: ['tasks', 'delete', task],
@@ -140,7 +184,7 @@ function applyCommand(current, command, newId) {
     if (operation === 'add') {
       if (state[key].length >= MAX_ITEMS) fail('最多添加 300 条，请先整理已有记录');
       if (state[key].some(item => item.id === newId)) fail('编号冲突，请重试');
-      state[key].push(validate(payload, newId));
+      state[key].push(validate(payload, newId, state.categories));
     } else {
       const index = state[key].findIndex(item => item.id === payload.id);
       if (index < 0) fail('这条记录已被删除，请刷新', 'NOT_FOUND');
@@ -148,11 +192,10 @@ function applyCommand(current, command, newId) {
         state[key].splice(index, 1);
         if (key === 'tasks') state.expenses.forEach(item => { if (item.taskId === payload.id) item.taskId = ''; });
       }
-      else state[key][index] = validate(Object.assign({}, state[key][index], payload), payload.id);
+      else state[key][index] = validate(Object.assign({}, state[key][index], payload), payload.id, state.categories);
     }
   }
-  validateLinks(state);
-  return state;
+  return validateWorkspace(state);
 }
 
 function taskBudget(state, taskId) {
@@ -221,6 +264,6 @@ function summary(state, today = todayString()) {
   };
 }
 
-const weddingDomain = { CATEGORIES, ASSIGNEES, MAX_ITEMS, createWorkspace, validateWorkspace, applyCommand, parseMoney, formatMoney, editMoney, date, deadline, dayNumber, todayString, taskViews, taskBudget, expenseViews, paymentReminders, summary, clone };
+const weddingDomain = { CATEGORIES, CATEGORY_ICONS, MAX_CATEGORIES, getCategories, categoryIconId, ASSIGNEES, MAX_ITEMS, createWorkspace, validateWorkspace, applyCommand, parseMoney, formatMoney, editMoney, date, deadline, dayNumber, todayString, taskViews, taskBudget, expenseViews, paymentReminders, summary, clone };
 if (typeof module !== 'undefined' && module.exports) module.exports = weddingDomain;
 else globalThis.WeddingDomain = weddingDomain;

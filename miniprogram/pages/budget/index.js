@@ -34,15 +34,16 @@ Page({
     this._snapshot = snapshot;
     const state = snapshot.workspace;
     const stats = domain.summary(state);
-    const breakdown = domain.CATEGORIES.map((name, index) => {
+    const categories = domain.getCategories(state).map(item => item.name);
+    const breakdown = categories.map((name, index) => {
       const items = state.expenses.filter(item => item.category === name);
       const planned = items.reduce((sum, item) => sum + item.planned, 0);
-      return { name, amount: domain.formatMoney(planned), percent: stats.planned ? planned / stats.planned * 100 : 0, color: COLORS[index], count: items.length };
+      return { name, amount: domain.formatMoney(planned), percent: stats.planned ? planned / stats.planned * 100 : 0, color: COLORS[index % COLORS.length], count: items.length };
     }).filter(item => item.count);
     const taskOptions = [{ id: '', title: '暂不关联安排' }].concat(state.tasks.map(task => ({ id: task.id, title: task.title })));
     const taskFilterOptions = [{ id: '', title: '全部安排' }].concat(taskOptions.slice(1));
     const taskFilter = state.tasks.some(task => task.id === this.data.taskFilter) ? this.data.taskFilter : '';
-    this.setData({ ready: true, profile: state.profile, stats, breakdown, taskOptions, taskFilterOptions, taskFilter, paidOverBudget: state.profile.totalBudget > 0 && stats.remaining < 0 });
+    this.setData({ ready: true, categories, category: categories.includes(this.data.category) ? this.data.category : '全部', profile: state.profile, stats, breakdown, taskOptions, taskFilterOptions, taskFilter, paidOverBudget: state.profile.totalBudget > 0 && stats.remaining < 0 });
     this.filterExpenses();
   },
   filterExpenses() {
@@ -50,7 +51,7 @@ Page({
     const items = domain.expenseViews(state).filter(item => (this.data.category === '全部' || item.category === this.data.category) && (!this.data.taskFilter || item.taskId === this.data.taskFilter));
     const taskFilterIndex = Math.max(0, this.data.taskFilterOptions.findIndex(item => item.id === this.data.taskFilter));
     const reminders = domain.paymentReminders(state).filter(item => !this.data.taskFilter || item.taskId === this.data.taskFilter);
-    this.setData({ taskFilterIndex, reminders: reminders.slice(0, 3), reminderCount: reminders.length, selectedBudget: domain.taskBudget(state, this.data.taskFilter), expenses: items.map(item => Object.assign({}, item, { exceeded: item.paid > item.planned, color: COLORS[domain.CATEGORIES.indexOf(item.category)], illustration: categoryIcon(item.category) })).reverse() });
+    this.setData({ taskFilterIndex, reminders: reminders.slice(0, 3), reminderCount: reminders.length, selectedBudget: domain.taskBudget(state, this.data.taskFilter), expenses: items.map(item => Object.assign({}, item, { exceeded: item.paid > item.planned, color: COLORS[this.data.categories.indexOf(item.category) % COLORS.length], illustration: categoryIcon(item.category, state) })).reverse() });
   },
   setTaskFilter(event) { const item = this.data.taskFilterOptions[Number(event.detail.value)]; if (item) { this.setData({ taskFilter: item.id, category: '全部' }); this.filterExpenses(); } },
   clearTaskFilter() { this.setData({ taskFilter: '', category: '全部' }); this.filterExpenses(); },
@@ -59,18 +60,18 @@ Page({
   openAdd() {
     this._editorRevision = this._snapshot.revision;
     const task = this._snapshot.workspace.tasks.find(item => item.id === this.data.taskFilter);
-    const category = task ? task.category : domain.CATEGORIES[0];
-    this.setData({ editor: true, editingId: '', form: { title: '', category, taskId: task ? task.id : '', paymentDueDate: '', plannedInput: '', paidInput: '', note: '' }, categoryIndex: domain.CATEGORIES.indexOf(category), taskIndex: Math.max(0, this.data.taskOptions.findIndex(item => task && item.id === task.id)) });
+    const category = task ? task.category : this.data.category === '全部' ? this.data.categories[0] : this.data.category;
+    this.setData({ editor: true, editingId: '', form: { title: '', category, taskId: task ? task.id : '', paymentDueDate: '', plannedInput: '', paidInput: '', note: '' }, categoryIndex: this.data.categories.indexOf(category), taskIndex: Math.max(0, this.data.taskOptions.findIndex(item => task && item.id === task.id)) });
   },
   openEdit(event) {
     const item = this._snapshot.workspace.expenses.find(expense => expense.id === event.currentTarget.dataset.id);
     if (!item) return;
     this._editorRevision = this._snapshot.revision;
-    this.setData({ editor: true, editingId: item.id, categoryIndex: domain.CATEGORIES.indexOf(item.category), taskIndex: Math.max(0, this.data.taskOptions.findIndex(task => task.id === item.taskId)), form: Object.assign({}, item, { plannedInput: domain.editMoney(item.planned), paidInput: domain.editMoney(item.paid) }) });
+    this.setData({ editor: true, editingId: item.id, categoryIndex: this.data.categories.indexOf(item.category), taskIndex: Math.max(0, this.data.taskOptions.findIndex(task => task.id === item.taskId)), form: Object.assign({}, item, { plannedInput: domain.editMoney(item.planned), paidInput: domain.editMoney(item.paid) }) });
   },
   closeEditor() { if (!this.data.saving) this.setData({ editor: false }); },
   field(event) { ui.field(this, event); },
-  chooseCategory(event) { const index = Number(event.detail.value); this.setData({ categoryIndex: index, 'form.category': domain.CATEGORIES[index] }); },
+  chooseCategory(event) { const index = Number(event.detail.value); this.setData({ categoryIndex: index, 'form.category': this.data.categories[index] }); },
   chooseTask(event) { const index = Number(event.detail.value); const item = this.data.taskOptions[index]; if (item) this.setData({ taskIndex: index, 'form.taskId': item.id }); },
   choosePaymentDate(event) { this.setData({ 'form.paymentDueDate': event.detail.value }); },
   clearPaymentDate() { this.setData({ 'form.paymentDueDate': '' }); },

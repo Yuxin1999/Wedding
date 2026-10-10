@@ -29,8 +29,9 @@
       </view>
     </view>
     <view class="enter-block enter-last section">
-      <view class="section-head"><text class="section-title">把期待，放进小小的抽屉</text><view class="illustration-subtitle">每个细节，都有你们喜欢的样子。</view></view>
-      <view class="inspiration-grid"><button wx:for="{{inspirations}}" wx:key="name" class="pressable inspiration-card" data-category="{{item.name}}" bindtap="openCategory" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><image src="{{item.illustration}}" mode="aspectFit" /><view class="inspiration-name">{{item.name}}</view><view class="inspiration-count">{{item.count}} 件待准备 ↗</view></button></view>
+      <view class="section-head"><view class="between category-heading"><text class="section-title">我们的备婚分类</text><button class="pressable text-link" bindtap="manageCategories" hover-class="is-pressed">管理分类 ›</button></view><view class="illustration-subtitle">把每个期待，收进喜欢的小抽屉。</view></view>
+      <view class="inspiration-grid"><button wx:for="{{inspirations}}" wx:key="id" class="pressable inspiration-card" data-category="{{item.name}}" bindtap="openCategory" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><image src="{{item.illustration}}" mode="aspectFit" /><view class="inspiration-copy"><view class="inspiration-name">{{item.name}}</view><view class="inspiration-count">{{item.count}} 件待准备 ↗</view></view></button></view>
+      <button class="pressable category-add" bindtap="addCategory" hover-class="is-pressed">＋ 新增分类</button>
     </view>
     <view class="enter-block enter-last section">
       <view class="between section-head"><text class="section-title">接下来，一起做</text><button class="pressable text-link" bindtap="openTasks" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">查看清单 ›</button></view>
@@ -57,3 +58,20 @@
     <view class="footer-note">婚礼是一天，我们是每一天。</view>
   </block>
 </view>
+<bottom-sheet visible="{{categoryEditor}}" busy="{{saving}}" title="{{categoryMode === 'list' ? '管理备婚分类' : editingCategoryId ? '编辑分类' : '新增分类'}}" bindclose="closeCategories">
+  <block wx:if="{{categoryMode === 'list'}}">
+    <view class="field-hint category-manager-hint">按你们的习惯命名，也可以换个喜欢的图标。清单和预算会一起更新。</view>
+    <button wx:for="{{inspirations}}" wx:key="id" class="pressable category-manage-row" data-id="{{item.id}}" bindtap="editCategory" hover-class="is-pressed"><image src="{{item.illustration}}" mode="aspectFit" /><view class="category-manage-copy"><view>{{item.name}}</view><view class="field-hint">{{item.taskCount}} 件事项 · {{item.expenseCount}} 笔开支</view></view><text class="muted">编辑 ›</text></button>
+    <button class="pressable category-add" bindtap="addCategory" hover-class="is-pressed">＋ 新增分类</button>
+    <view class="field-hint">{{inspirations.length}} / 24 个分类</view>
+  </block>
+  <block wx:else>
+    <button class="text-link category-back" bindtap="backToCategories" disabled="{{saving}}">‹ 返回分类列表</button>
+    <view class="field"><text class="field-label">分类名称</text><input class="field-input" value="{{categoryForm.name}}" bindinput="categoryName" maxlength="12" placeholder="比如：蜜月旅行、婚车接送" disabled="{{saving}}" /></view>
+    <view class="field"><text class="field-label">选一个喜欢的图标</text><view class="category-icon-grid"><button wx:for="{{icons}}" wx:key="id" class="pressable category-icon-option {{categoryForm.icon === item.id ? 'selected' : ''}}" data-icon="{{item.id}}" bindtap="chooseCategoryIcon" disabled="{{saving}}" hover-class="is-pressed" aria-label="{{item.title}}{{categoryForm.icon === item.id ? '，已选择' : ''}}"><image src="{{item.illustration}}" mode="aspectFit" /><text>{{item.title}}</text><text wx:if="{{categoryForm.icon === item.id}}" class="category-icon-check">✓</text></button></view></view>
+    <view wx:if="{{categoryError}}" class="notice error-notice">{{categoryError}}</view>
+    <view wx:if="{{editingCategoryId}}" class="field-hint category-manager-hint">改名和更换图标会同步到此分类的清单与预算。需先移走所有事项和开支，才能删除分类；至少保留一个分类。</view>
+    <button class="pressable primary category-save" bindtap="saveCategory" disabled="{{saving}}" loading="{{saving}}" hover-class="is-pressed">保存分类</button>
+    <button wx:if="{{canDeleteCategory}}" class="pressable danger-link" bindtap="removeCategory" disabled="{{saving}}" hover-class="is-pressed">删除空分类</button>
+  </block>
+</bottom-sheet>

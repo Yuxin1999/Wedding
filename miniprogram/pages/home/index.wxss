@@ -61,10 +61,28 @@
 .stat-icon { width: 61rpx; height: 61rpx; margin: -9rpx -6rpx; }
 .illustration-subtitle { font-size: 21rpx; color: #a2a68d; margin-top: 9rpx; }
 .inspiration-grid { display: flex; flex-wrap: wrap; gap: 18rpx; }
-.inspiration-card { width: calc((100% - 36rpx) / 3); padding: 26rpx 10rpx 24rpx; border: 1rpx solid #e1dfd1; border-radius: 24rpx; background: #fffdf7; }
-.inspiration-card image { width: 115rpx; height: 115rpx; display: block; margin: 0 auto 11rpx; }
-.inspiration-name { font-size: 24rpx; color: #7a866a; }
-.inspiration-count { color: #a1a98f; font-size: 18rpx; margin-top: 8rpx; }
+/* Higher specificity than WeChat v2 button:not([size="mini"]). */
+button[class].inspiration-card { display: flex; align-items: center; gap: 14rpx; flex: 0 0 calc((100% - 18rpx) / 2); width: calc((100% - 18rpx) / 2); min-width: 0; margin: 0; padding: 24rpx 18rpx; min-height: 134rpx; text-align: left; border: 1rpx solid #e1dfd1; border-radius: 22rpx; background: #fffdf7; }
+.inspiration-card image { flex: 0 0 76rpx; width: 76rpx; height: 76rpx; display: block; margin: 0; }
+.inspiration-copy { flex: 1; min-width: 0; }
+.inspiration-name { font-size: 25rpx; line-height: 1.5; color: #68765b; overflow-wrap: anywhere; }
+.inspiration-count { color: #919b80; font-size: 19rpx; margin-top: 6rpx; white-space: nowrap; }
+.category-heading { gap: 20rpx; }
+.category-heading .text-link { flex-shrink: 0; }
+button[class].category-add { width: 100%; margin: 18rpx 0 0; padding: 22rpx 20rpx; border: 1rpx dashed #cbd3bc; border-radius: 20rpx; font-size: 25rpx; color: #768565; background: #f1f3e9; }
+.category-manager-hint { margin-bottom: 24rpx; }
+button[class].category-manage-row { display: flex; align-items: center; gap: 20rpx; width: 100%; min-width: 0; margin: 0; padding: 18rpx 0; text-align: left; border-bottom: 1rpx solid #e9e9df; font-size: 27rpx; }
+.category-manage-row image { width: 70rpx; height: 70rpx; flex: 0 0 70rpx; }
+.category-manage-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.category-manage-row > text { font-size: 22rpx; flex-shrink: 0; }
+button[class].category-back { margin-bottom: 26rpx; }
+.category-icon-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+button[class].category-icon-option { position: relative; flex: 0 0 calc((100% - 36rpx) / 4); width: calc((100% - 36rpx) / 4); min-width: 0; margin: 0; padding: 12rpx 4rpx; border: 2rpx solid #e9e8df; border-radius: 18rpx; background: #fffdf7; font-size: 18rpx; color: #8c957c; line-height: 1.6; }
+button[class].category-icon-option.selected { border-color: #83966f; background: #edf1e4; color: #5f754c; }
+.category-icon-option image { display: block; width: 70rpx; height: 70rpx; margin: 0 auto 8rpx; }
+.category-icon-option > text { display: block; }
+.category-icon-option .category-icon-check { position: absolute; top: 3rpx; right: 8rpx; font-size: 22rpx; }
+button[class].category-save { width: 100%; margin: 24rpx 0 0; padding: 24rpx; }
 .journey { position: relative; }
 .journey-illustration { position: absolute; right: 18rpx; top: 10rpx; width: 97rpx; height: 97rpx; opacity: .8; }
 .journey-title { font-size: 28rpx; max-width: 80%; }

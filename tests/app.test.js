@@ -108,6 +108,46 @@ test('native task-budget navigation, binding, reminders and deletion preserve ex
   delete global.wx;
 });
 
+test('native categories can be added, selected, renamed across pages, reloaded and safely deleted', async () => {
+  const wx = makeWx(); global.wx = wx;
+  const event = id => ({ currentTarget: { dataset: { id } } });
+  const home = page('home', wx); await home.refresh(); home.addCategory();
+  home.categoryName({ detail: { value: '蜜月旅行' } });
+  home.chooseCategoryIcon({ currentTarget: { dataset: { icon: 'car' } } }); await home.saveCategory();
+  assert.equal(home.data.categoryMode, 'list');
+  const category = home.data.inspirations.at(-1);
+  assert.equal(category.name, '蜜月旅行'); assert.match(category.illustration, /car.png$/);
+  home.openCategory({ currentTarget: { dataset: { category: category.name } } });
+  const tasks = page('tasks', wx); await tasks.onShow();
+  assert.equal(tasks.data.category, category.name); assert.equal(tasks.data.tasks.length, 0);
+  tasks.openAdd(); assert.equal(tasks.data.form.category, category.name);
+  tasks.setData({ 'form.title': '预订蜜月机票' }); await tasks.save();
+  const task = tasks.data.tasks[0]; assert.match(task.illustration, /car.png$/);
+  tasks.openBudget(event(task.id));
+  const budget = page('budget', wx); await budget.onShow(); budget.openAdd();
+  assert.equal(budget.data.form.category, category.name);
+  budget.setData({ 'form.title': '机票', 'form.plannedInput': '1000', 'form.paymentDueDate': '2028-05-01' }); await budget.save();
+  assert.equal(budget.data.expenses[0].category, category.name);
+  await home.refresh(); home.manageCategories(); home.editCategory(event(category.id));
+  assert.equal(home.data.canDeleteCategory, false);
+  home.categoryName({ detail: { value: '蜜月安排' } });
+  home.chooseCategoryIcon({ currentTarget: { dataset: { icon: 'heart' } } }); await home.saveCategory();
+  await tasks.refresh(); await budget.refresh();
+  assert.equal(tasks.data.category, '全部', 'A renamed active filter resets safely');
+  assert.equal(tasks.data.tasks.find(item => item.id === task.id).category, '蜜月安排');
+  assert.equal(budget.data.expenses[0].taskId, task.id);
+  assert.equal(budget.data.expenses[0].paymentDueDate, '2028-05-01');
+  assert.match(budget.data.expenses[0].illustration, /heart.png$/);
+  assert.equal(budget.data.breakdown[0].name, '蜜月安排');
+  const reload = page('home', wx); await reload.refresh(); assert.equal(reload.data.inspirations.at(-1).name, '蜜月安排');
+  reload.addCategory(); reload.categoryName({ detail: { value: '蜜月安排' } }); await reload.saveCategory();
+  assert.equal(reload.data.categoryMode, 'edit'); assert.match(reload.data.categoryError, /已经存在/);
+  reload.categoryName({ detail: { value: '空分类' } }); await reload.saveCategory();
+  reload.editCategory(event(reload.data.inspirations.at(-1).id)); assert.equal(reload.data.canDeleteCategory, true);
+  await reload.removeCategory(); assert.equal(reload.data.inspirations.length, 7);
+  delete global.wx;
+});
+
 test('invalid input stays in the editor and leaves stored data unchanged', async () => {
   const wx = makeWx(); global.wx = wx;
   const budget = page('budget', wx); await budget.refresh(); budget.openAdd();

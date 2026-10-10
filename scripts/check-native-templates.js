@@ -45,6 +45,12 @@ const config = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
     assert.ok(tree.children.length, pagePath);
     if (page.openAdd) { page.openAdd(); tree = render(pagePath + '.wxml')(page.data); }
     else if (page.openEditor) { page.openEditor(); tree = render(pagePath + '.wxml')(page.data); }
+    else if (page.addCategory) {
+      page.manageCategories(); tree = render(pagePath + '.wxml')(page.data);
+      assert.match(JSON.stringify(tree), /category-manage-row/);
+      page.addCategory(); tree = render(pagePath + '.wxml')(page.data);
+      assert.match(JSON.stringify(tree), /category-icon-option/);
+    }
     assert.ok(tree.children.length, `${pagePath} editor`);
     console.log(`Native WXML compiled + render tree produced: ${pagePath}`);
   }

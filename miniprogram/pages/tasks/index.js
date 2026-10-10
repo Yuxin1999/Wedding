@@ -14,8 +14,9 @@ Page({
   async onShow() {
     this.setData({ pageVisible: true });
     const category = wx.getStorageSync('wedding:task-category');
-    if (domain.CATEGORIES.includes(category)) { this.setData({ category, filter: 'pending', ownerIndex: 0, query: '' }); wx.setStorageSync('wedding:task-category', ''); }
     await this.refresh();
+    if (this.data.categories.includes(category)) { this.setData({ category, filter: 'pending', ownerIndex: 0, query: '' }); this.filterTasks(); }
+    if (category) wx.setStorageSync('wedding:task-category', '');
     const taskId = wx.getStorageSync('wedding:open-task');
     if (taskId && this._snapshot) {
       wx.setStorageSync('wedding:open-task', '');
@@ -36,7 +37,8 @@ Page({
   render(snapshot) {
     this._snapshot = snapshot;
     const state = snapshot.workspace;
-    this.setData({ ready: true, profile: state.profile, stats: domain.summary(state), ownerFilters: ['所有人', '一起', state.profile.name1, state.profile.name2] });
+    const categories = domain.getCategories(state).map(item => item.name);
+    this.setData({ ready: true, categories, categoryFilters: ['全部'].concat(categories), category: categories.includes(this.data.category) ? this.data.category : '全部', profile: state.profile, stats: domain.summary(state), ownerFilters: ['所有人', '一起', state.profile.name1, state.profile.name2] });
     this.filterTasks();
   },
   filterTasks() {
@@ -49,7 +51,7 @@ Page({
       (!selectedOwner || item.assignee === selectedOwner) &&
       (!query.trim() || item.title.toLowerCase().includes(query.trim().toLowerCase()))
     );
-    this.setData({ tasks: tasks.map(item => Object.assign({}, item, { illustration: categoryIcon(item.category) })) });
+    this.setData({ tasks: tasks.map(item => Object.assign({}, item, { illustration: categoryIcon(item.category, this._snapshot.workspace) })) });
   },
   setFilter(event) { this.setData({ filter: event.currentTarget.dataset.key }); this.filterTasks(); },
   setCategory(event) { this.setData({ category: event.currentTarget.dataset.category }); this.filterTasks(); },
@@ -57,7 +59,8 @@ Page({
   search(event) { this.setData({ query: event.detail.value }); this.filterTasks(); },
   openAdd() {
     this._editorRevision = this._snapshot.revision;
-    this.setData({ editor: true, editingId: '', form: { title: '', category: domain.CATEGORIES[0], assignee: 'both', dueDate: '', daysBefore: null, done: false, note: '' }, formCategoryIndex: 0 });
+    const category = this.data.category === '全部' ? this.data.categories[0] : this.data.category;
+    this.setData({ editor: true, editingId: '', form: { title: '', category, assignee: 'both', dueDate: '', daysBefore: null, done: false, note: '' }, formCategoryIndex: this.data.categories.indexOf(category) });
   },
   openBudget(event) {
     wx.setStorageSync('wedding:budget-task', event.currentTarget.dataset.id);
@@ -67,11 +70,11 @@ Page({
     const item = this._snapshot.workspace.tasks.find(task => task.id === event.currentTarget.dataset.id);
     if (!item) return;
     this._editorRevision = this._snapshot.revision;
-    this.setData({ editor: true, editingId: item.id, form: Object.assign({}, item), linkedBudget: domain.taskBudget(this._snapshot.workspace, item.id), formCategoryIndex: domain.CATEGORIES.indexOf(item.category) });
+    this.setData({ editor: true, editingId: item.id, form: Object.assign({}, item), linkedBudget: domain.taskBudget(this._snapshot.workspace, item.id), formCategoryIndex: this.data.categories.indexOf(item.category) });
   },
   closeEditor() { if (!this.data.saving) this.setData({ editor: false }); },
   field(event) { ui.field(this, event); },
-  chooseCategory(event) { const index = Number(event.detail.value); this.setData({ formCategoryIndex: index, 'form.category': domain.CATEGORIES[index] }); },
+  chooseCategory(event) { const index = Number(event.detail.value); this.setData({ formCategoryIndex: index, 'form.category': this.data.categories[index] }); },
   chooseAssignee(event) { this.setData({ 'form.assignee': event.currentTarget.dataset.owner }); },
   chooseDate(event) { this.setData({ 'form.dueDate': event.detail.value }); },
   clearDate() { this.setData({ 'form.dueDate': '' }); },

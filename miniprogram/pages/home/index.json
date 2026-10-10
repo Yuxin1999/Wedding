@@ -1,1 +1,1 @@
-{ "navigationBarTitleText": "一起备婚" }
+{ "navigationBarTitleText": "一起备婚", "usingComponents": { "bottom-sheet": "/components/bottom-sheet/index" } }
