@@ -67,6 +67,8 @@ npm run verify
 
 当前云工作区还保留了可选的腾讯 Linux 模板编译器，可运行 `node scripts/check-native-templates.js /workspace/.tools/wedding-compiler/node_modules/miniprogram-compiler`，检查原生 WXML / WXSS 编译和页面渲染树。其他机器可在仓库外安装 `miniprogram-compiler@0.2.3` 并把安装路径传给同一脚本。具体已验证范围见 [验证记录](docs/validation.md)。
 
+安装上述编译器与 Playwright 后，可运行 `node scripts/check-task-layout.js /绝对路径/miniprogram-compiler`。它在浏览器中加入微信 v2 默认按钮尺寸，检查事项的方形勾选框、文字宽度、筛选按钮和长标题换行，防止默认按钮样式再次挤占内容。此辅助检查不能替代真机预览。
+
 修改 `shared/domain.js` 后执行 `npm run prepare`。仓库内的两份输出用于让小程序和单独部署的云函数使用同一套验证规则；无需将运行时依赖放进前端。
 
 开发云函数时：
