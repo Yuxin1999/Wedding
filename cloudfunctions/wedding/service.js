@@ -20,7 +20,7 @@ function createService(store, { now = Date.now, makeId = id, makeCode = inviteCo
     return { user, space };
   }
   function snapshot(space, openid) {
-    return { workspace: space.workspace, revision: space.revision, role: space.members.indexOf(openid) === 0 ? 'p1' : 'p2', memberCount: space.members.length };
+    return { workspace: space.workspace, revision: space.revision, role: space.members.indexOf(openid) === 0 ? 'p1' : 'p2', memberCount: space.members.length, lastChange: space.lastChange || null };
   }
 
   return async function execute(openid, event) {
@@ -41,7 +41,7 @@ function createService(store, { now = Date.now, makeId = id, makeCode = inviteCo
         }
         const workspace = domain.validateWorkspace(event.workspace);
         const spaceId = makeId();
-        const space = { workspace, members: [openid], revision: 1, createdAt: now(), updatedAt: now(), inviteHash: '' };
+        const space = { workspace, members: [openid], revision: 1, createdAt: now(), updatedAt: now(), inviteHash: '', lastChange: { actor: 'p1', text: '创建了共同空间', at: now() } };
         await tx.set('wedding_spaces', spaceId, space);
         await tx.set('wedding_users', hash(openid), { spaceId });
         return snapshot(space, openid);
@@ -51,18 +51,23 @@ function createService(store, { now = Date.now, makeId = id, makeCode = inviteCo
         if (!/^[A-Z2-9]{12}$/.test(code)) reject('INVALID_INVITE', '邀请码应为 12 位字母和数字');
         const tokenHash = hash(code);
         const invite = await tx.get('wedding_invites', tokenHash);
-        if (!invite || invite.expiresAt <= now()) reject('INVALID_INVITE', '邀请码无效或已过期，请让伴侣重新生成');
+        if (!invite) reject('INVALID_INVITE', '邀请码无效或已过期，请让伴侣重新生成');
         const space = await tx.get('wedding_spaces', invite.spaceId);
-        if (!space || space.inviteHash !== tokenHash) reject('INVALID_INVITE', '邀请码已失效，请让伴侣重新生成');
+        if (!space) reject('INVALID_INVITE', '邀请码已失效，请让伴侣重新生成');
         const existing = await tx.get('wedding_users', hash(openid));
         if (existing) {
           if (existing.spaceId === invite.spaceId && space.members.includes(openid)) return snapshot(space, openid);
           reject('ALREADY_JOINED', '你已经有共同空间，不能加入另一个');
         }
+        // Retrying a successful join after a lost response is safe for that member.
+        // Everyone else must still present the current, unexpired invitation.
+        if (invite.expiresAt <= now()) reject('INVALID_INVITE', '邀请码无效或已过期，请让伴侣重新生成');
+        if (space.inviteHash !== tokenHash) reject('INVALID_INVITE', '邀请码已失效，请让伴侣重新生成');
         if (space.members.length >= 2) reject('SPACE_FULL', '这个空间已有两位成员');
         space.members.push(openid);
         space.revision += 1;
         space.updatedAt = now();
+        space.lastChange = { actor: 'p2', text: '加入了共同空间', at: now() };
         // Consumed invitations are revoked, including for future guesses.
         space.inviteHash = '';
         await tx.set('wedding_spaces', invite.spaceId, space);
@@ -85,6 +90,9 @@ function createService(store, { now = Date.now, makeId = id, makeCode = inviteCo
         space.workspace = domain.applyCommand(space.workspace, event.command, makeId());
         space.revision += 1;
         space.updatedAt = now();
+        const type = event.command.type;
+        const text = type === 'updateProfile' ? '更新了我们的约定' : type.endsWith('Task') ? '更新了备婚清单' : type.endsWith('Expense') ? '更新了预算' : '更新了分类';
+        space.lastChange = { actor: space.members.indexOf(openid) === 0 ? 'p1' : 'p2', text, at: now() };
         await tx.set('wedding_spaces', user.spaceId, space);
         return snapshot(space, openid);
       }

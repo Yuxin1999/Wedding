@@ -52,6 +52,15 @@ const config = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
       assert.match(JSON.stringify(tree), /category-icon-option/);
     }
     assert.ok(tree.children.length, `${pagePath} editor`);
+    page.render(Object.assign({}, page._snapshot, { mode: 'cloud', configured: true, memberCount: 2, role: 'p2', lastChange: { actor: 'p1', text: '更新了备婚清单', at: Date.now() } }));
+    tree = render(pagePath + '.wxml')(page.data);
+    assert.match(JSON.stringify(tree), /shared-sync-bar/, `${pagePath} shared status`);
+    if (page.invite) {
+      assert.match(JSON.stringify(tree), /member-card/);
+      page.render(Object.assign({}, page._snapshot, { memberCount: 1, role: 'p1' }));
+      page.setData({ inviteCode: 'ABCDEFGHJK23', inviteExpiresLabel: '10月17日 12:00' });
+      assert.match(JSON.stringify(render(pagePath + '.wxml')(page.data)), /invite-share/);
+    }
     console.log(`Native WXML compiled + render tree produced: ${pagePath}`);
   }
   for (const closing of [false, true]) {

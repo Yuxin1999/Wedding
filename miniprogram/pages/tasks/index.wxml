@@ -1,4 +1,5 @@
 <view class="{{ready && pageVisible ? 'page-enter' : ''}} page tasks-page">
+  <view wx:if="{{syncEnabled}}" class="shared-sync-bar"><text class="{{syncError ? 'overdue' : ''}}">{{syncError || '共同计划 · 最近同步 ' + syncedAt}}</text><button class="text-link" bindtap="refresh" disabled="{{loading}}">刷新</button></view>
   <view class="page-heading enter-block">
     <view class="page-heading-copy"><view class="eyebrow">LITTLE THINGS, BIG DAY</view>
       <view class="between title-row"><view class="page-title">一件件，慢慢来</view><text wx:if="{{ready}}" class="pill">{{stats.done}} / {{stats.total}}</text></view>

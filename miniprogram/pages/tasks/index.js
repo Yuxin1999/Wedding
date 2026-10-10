@@ -1,9 +1,10 @@
 const store = require('../../utils/store');
 const domain = require('../../utils/domain');
 const ui = require('../../utils/ui');
+const { withSync } = require('../../utils/collaboration');
 const { categoryIcon } = require('../../utils/illustrations');
 
-Page({
+Page(withSync({
   data: {
     loading: true, ready: false, pageVisible: false, errorMessage: '', filter: 'pending', category: '全部', ownerIndex: 0, query: '',
     filters: [{ key: 'pending', label: '待完成' }, { key: 'all', label: '全部' }, { key: 'done', label: '已完成' }],
@@ -17,6 +18,11 @@ Page({
     await this.refresh();
     if (this.data.categories.includes(category)) { this.setData({ category, filter: 'pending', ownerIndex: 0, query: '' }); this.filterTasks(); }
     if (category) wx.setStorageSync('wedding:task-category', '');
+    const owner = wx.getStorageSync('wedding:task-owner');
+    if (domain.ASSIGNEES.includes(owner)) {
+      wx.setStorageSync('wedding:task-owner', '');
+      this.setData({ category: '全部', filter: 'pending', ownerIndex: ['', 'both', 'p1', 'p2'].indexOf(owner), query: '' }); this.filterTasks();
+    }
     const taskId = wx.getStorageSync('wedding:open-task');
     if (taskId && this._snapshot) {
       wx.setStorageSync('wedding:open-task', '');
@@ -111,4 +117,4 @@ Page({
     } catch (error) { ui.error(error); if (error.code === 'CONFLICT') { await this.refresh(); this._editorRevision = this._snapshot.revision; } }
     finally { this.setData({ saving: false }); }
   }
-});
+}));

@@ -34,8 +34,9 @@ async function getSnapshot() {
   if (mode() === 'local') return decorate({ workspace: local(), revision: 0, memberCount: 1, role: 'p1' }, 'local');
   const result = await call('status');
   if (!result.connected) throw new Error('尚未建立共同空间，请在“我们”中重新连接');
-  cloudSnapshot = result;
-  return decorate(result, 'cloud');
+  // A slow poll must not move the cached revision behind a completed save.
+  if (!cloudSnapshot || result.revision >= cloudSnapshot.revision) cloudSnapshot = result;
+  return decorate(cloudSnapshot, 'cloud');
 }
 async function mutate(command, revision) {
   if (busy) throw new Error('正在保存，请稍候');

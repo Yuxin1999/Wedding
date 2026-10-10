@@ -3,7 +3,7 @@
 .sheet-panel { position: absolute; bottom: 20rpx; bottom: calc(20rpx + env(safe-area-inset-bottom)); left: 24rpx; right: 24rpx; background: #fffefb; border: 1rpx solid #e3e1d5; border-radius: 36rpx; padding-top: 18rpx; overflow: hidden; box-shadow: 0 16rpx 60rpx rgba(43, 55, 37, .14); animation: sheet-in .28s cubic-bezier(.2, .7, .3, 1) both; }
 .sheet-handle { width: 66rpx; height: 6rpx; border-radius: 8rpx; margin: 0 auto; background: #dfe2d4; }
 .sheet-header { padding: 24rpx 32rpx 26rpx 40rpx; }
-.sheet-close { font-size: 42rpx; color: #859079; width: 64rpx; height: 64rpx; flex-shrink: 0; border-radius: 50%; background: #f1f3e9; }
+button[class].sheet-close { font-size: 42rpx; color: #859079; width: 64rpx; min-width: 64rpx; height: 64rpx; margin: 0; padding: 0; flex: 0 0 64rpx; border-radius: 50%; background: #f1f3e9; }
 .sheet-body { height: 64vh; max-height: calc(100vh - 240rpx - env(safe-area-inset-bottom)); }
 .sheet-content { padding: 12rpx 40rpx 44rpx; }
 .sheet-closing .sheet-panel { animation: sheet-out .22s ease-in both; pointer-events: none; }

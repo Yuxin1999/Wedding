@@ -1,4 +1,5 @@
 <view class="{{ready && pageVisible ? 'page-enter' : ''}} page">
+  <view wx:if="{{syncEnabled}}" class="shared-sync-bar"><text class="{{syncError ? 'overdue' : ''}}">{{syncError || '共同计划 · 最近同步 ' + syncedAt}}</text><button class="text-link" bindtap="refresh" disabled="{{loading}}">刷新</button></view>
   <view wx:if="{{loading}}" class="loading-line">正在整理你们的计划…</view>
   <view wx:if="{{errorMessage}}" class="pressable notice error-notice" bindtap="refresh" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{errorMessage}} · 点此重试</view>
   <block wx:if="{{ready}}">

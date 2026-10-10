@@ -1,4 +1,5 @@
 <view class="{{ready && pageVisible ? 'page-enter' : ''}} page together-page">
+  <view wx:if="{{syncEnabled}}" class="shared-sync-bar"><text class="{{syncError ? 'overdue' : ''}}">{{syncError || '共同计划 · 最近同步 ' + syncedAt}}</text><button class="text-link" bindtap="refresh" disabled="{{loading}}">刷新</button></view>
   <view class="eyebrow centered">TWO PEOPLE, ONE LITTLE WORLD</view>
   <view wx:if="{{loading}}" class="loading-line">正在打开我们的小世界…</view>
   <view wx:if="{{errorMessage}}" class="pressable notice error-notice" bindtap="refresh" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{errorMessage}} · 点此重试</view>
@@ -22,9 +23,13 @@
         <block wx:else><button class="secondary unavailable" disabled="{{true}}">双人同步待开通</button><view class="space-footnote">本机体验版 · 当前记录不会同步给伴侣</view></block>
       </block>
       <block wx:else>
-        <view class="space-copy">{{memberCount === 2 ? '你们已经在同一个空间。每次打开页面或下拉刷新，都能看到对方最新的安排。' : '空间已经准备好，还差另一个主角。把邀请码交给伴侣，一起开始吧。'}}</view>
+        <view class="space-copy">{{memberCount === 2 ? '称呼、婚期、清单、分类与预算，都是你们共同的安排。可以分给彼此，也可以一起完成。' : '空间已经准备好，还差另一个主角。发一张邀请卡片，或把邀请码交给伴侣。'}}</view>
+        <view class="member-grid"><button wx:for="{{members}}" wx:key="role" class="pressable member-card" data-owner="{{item.role}}" bindtap="openMemberTasks" hover-class="is-pressed"><view class="member-name">{{item.name}}<text class="member-you">{{item.isYou ? '你' : '伴侣'}}</text></view><view class="member-state">{{item.joined ? '已加入' : '等待加入'}}</view><view class="member-count">{{item.pending}} 件待办 · {{item.done}} 件完成 ›</view></button></view>
+        <button class="pressable shared-tasks" data-owner="both" bindtap="openMemberTasks" hover-class="is-pressed">♡ 一起准备的 {{sharedPending}} 件小事 ›</button>
+        <view wx:if="{{lastChangeLabel}}" class="last-change">{{lastChangeLabel}}</view>
+        <view class="field-hint">停留页面时每 15 秒自动同步；编辑时暂停，避免打断输入。也可以点上方“刷新”立即更新。</view>
         <view wx:if="{{memberCount === 2}}" class="bound-note">♡ 两位主角，已到齐</view>
-        <block wx:else><button class="pressable primary" bindtap="invite" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{inviteCode ? '重新生成邀请码' : '邀请我的伴侣'}}</button><view wx:if="{{inviteCode}}" class="invite-box"><text class="invite-code" selectable="{{true}}">{{inviteCode}}</text><button class="pressable text-link" bindtap="copyInvite" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">复制邀请码</button><view class="field-hint">7 天内有效 · 重新生成后旧码失效</view></view></block>
+        <block wx:else><button class="pressable primary" bindtap="invite" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">{{inviteCode ? '重新生成邀请码' : '邀请我的伴侣'}}</button><view wx:if="{{inviteCode}}" class="invite-box"><text class="invite-code" selectable="{{true}}">{{inviteCode}}</text><button class="pressable secondary invite-share" open-type="share" hover-class="is-pressed">发邀请卡片给伴侣</button><button class="pressable text-link" bindtap="copyInvite" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">复制邀请码</button><view class="field-hint">{{inviteExpiresLabel}} 前有效 · 仅限一位伴侣<view>重新生成后旧邀请码和邀请卡片都会失效</view></view></view></block>
         <button class="pressable local-link" bindtap="localMode" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">查看保留的本机计划</button>
       </block>
     </view>
@@ -41,6 +46,6 @@
 </bottom-sheet>
 <bottom-sheet visible="{{joinEditor}}" busy="{{connecting}}" title="加入伴侣的共同空间" bindclose="closeJoin">
   <view class="field"><text class="field-label">伴侣发来的邀请码</text><input class="field-input code-input" maxlength="12" placeholder="输入 12 位邀请码" value="{{joinCode}}" bindinput="codeInput" /></view>
-  <view class="notice join-notice">加入后显示伴侣空间里的计划。你这台设备原有的本机计划会保留，但不会自动合并。</view>
-  <button class="pressable primary" bindtap="join" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">一起开始准备</button>
+  <view class="notice join-notice">确认后会显示伴侣空间里的计划；两人都能修改清单、分类和预算。你这台设备原有的本机计划会保留，但不会自动合并。</view>
+  <button class="pressable primary join-submit" bindtap="join" loading="{{connecting}}" disabled="{{connecting}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">一起开始准备</button>
 </bottom-sheet>

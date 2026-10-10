@@ -1,9 +1,10 @@
 const store = require('../../utils/store');
 const domain = require('../../utils/domain');
 const ui = require('../../utils/ui');
+const { withSync } = require('../../utils/collaboration');
 const { categoryIcon } = require('../../utils/illustrations');
 
-Page({
+Page(withSync({
   data: { loading: true, ready: false, pageVisible: false, errorMessage: '', categoryEditor: false, categoryMode: 'list', saving: false, categoryForm: {}, categoryError: '', icons: domain.CATEGORY_ICONS.map(item => Object.assign({}, item, { illustration: `/assets/illustrations/${item.id}.png` })) },
   onHide() { this.setData({ pageVisible: false }); },
   onShow() { this.setData({ pageVisible: true }); this.refresh(); },
@@ -86,4 +87,4 @@ Page({
   openBudget() { ui.navigateTab('/pages/budget/index'); },
   openPayment(event) { wx.setStorageSync('wedding:open-expense', event.currentTarget.dataset.id); this.openBudget(); },
   openTogether() { ui.navigateTab('/pages/together/index'); }
-});
+}));

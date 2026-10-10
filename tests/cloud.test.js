@@ -75,6 +75,16 @@ test('an invitation admits at most one partner even when two users join concurre
   await assert.rejects(ctx.execute('alice', { action: 'invite' }), { code: 'SPACE_FULL' });
 });
 
+test('a consumed invitation permits only the joined member to retry after a lost response', async () => {
+  const ctx = setup(); const { joined, invite } = await couple(ctx);
+  const retried = await ctx.execute('bob', { action: 'join', code: invite.code });
+  assert.equal(retried.revision, joined.revision); assert.equal(retried.memberCount, 2);
+  assert.equal(retried.lastChange.actor, 'p2'); assert.equal(retried.lastChange.text, '加入了共同空间');
+  await assert.rejects(ctx.execute('mallory', { action: 'join', code: invite.code }), { code: 'INVALID_INVITE' });
+  const updated = await ctx.execute('alice', { action: 'command', revision: retried.revision, lastChange: { actor: 'p2' }, command: { type: 'updateTask', payload: { id: 'starter-1', done: true } } });
+  assert.equal(updated.lastChange.actor, 'p1', 'The server derives authorship from the real member');
+});
+
 test('expired and replaced invitation codes are rejected and raw tokens are not stored', async () => {
   const ctx = setup();
   await ctx.execute('alice', { action: 'create', workspace: createWorkspace() });

@@ -1,10 +1,11 @@
 const store = require('../../utils/store');
 const domain = require('../../utils/domain');
 const ui = require('../../utils/ui');
+const { withSync } = require('../../utils/collaboration');
 const { categoryIcon } = require('../../utils/illustrations');
 const COLORS = ['#6d8059', '#b4b991', '#d2bd8c', '#9aada0', '#c8a493', '#b6bcb2'];
 
-Page({
+Page(withSync({
   data: { loading: true, ready: false, pageVisible: false, errorMessage: '', categories: domain.CATEGORIES, category: '全部', taskFilter: '', taskFilterIndex: 0, editor: false, saving: false, form: {}, taskOptions: [] },
   onHide() { this.setData({ pageVisible: false }); },
   async onShow() {
@@ -99,4 +100,4 @@ Page({
     finally { this.setData({ saving: false }); }
   },
   setBudget() { ui.navigateTab('/pages/together/index'); }
-});
+}));

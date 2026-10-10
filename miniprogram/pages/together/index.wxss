@@ -16,6 +16,17 @@
 .space-card { background: #f1f3e9; border-color: #e2e8d4; }
 .space-copy { color: #879278; font-size: 25rpx; margin: 22rpx 0 28rpx; line-height: 1.9; }
 .space-footnote { color: #959e86; text-align: center; font-size: 21rpx; margin-top: 17rpx; }
+.space-card button[class].primary, .space-card button[class].secondary { width: 100%; margin: 20rpx 0 0; padding: 24rpx 18rpx; }
+.space-card button[class].join-link, .space-card button[class].local-link { width: 100%; margin-left: 0; margin-right: 0; padding: 18rpx 0; }
+.member-grid { display: flex; gap: 16rpx; margin-bottom: 18rpx; }
+button[class].member-card { flex: 1; width: 0; min-width: 0; margin: 0; padding: 22rpx 18rpx; text-align: left; border-radius: 18rpx; background: #fffdf8; border: 1rpx solid #e0e5d5; }
+.member-name { font-size: 27rpx; overflow-wrap: anywhere; }
+.member-you { display: inline-block; margin-left: 10rpx; font-size: 18rpx; color: #8b9a78; }
+.member-state { color: #7a8d68; font-size: 22rpx; margin-top: 12rpx; }
+.member-count { color: #909b80; font-size: 19rpx; margin-top: 8rpx; }
+button[class].shared-tasks { width: 100%; margin: 0 0 20rpx; padding: 18rpx; color: #75895e; font-size: 23rpx; background: #e7eddc; border-radius: 14rpx; }
+.last-change { color: #7e8b70; font-size: 22rpx; margin: 18rpx 0; overflow-wrap: anywhere; }
+.space-card .bound-note { margin-top: 22rpx; }
 .unavailable[disabled] { background: #e4e9d9; color: #91a17d; }
 .join-link { font-size: 24rpx; color: #7b8e63; margin: 24rpx 0 2rpx; }
 .local-link { font-size: 21rpx; color: #97a185; margin-top: 25rpx; }
@@ -28,6 +39,7 @@
 .tool-note { font-size: 21rpx; color: #9aa48b; margin-top: 7rpx; }
 .code-input { font-family: monospace; letter-spacing: 4rpx; }
 .join-notice { margin-bottom: 28rpx; }
+button[class].join-submit { width: 100%; margin: 0; padding: 24rpx; }
 .couple-section { background: #f5efe2; border: 1rpx solid #eae2d2; border-radius: 28rpx 28rpx 75rpx 28rpx; margin: 32rpx 0 36rpx; padding: 28rpx 28rpx 40rpx; }
 .couple-illustration { display: block; width: 490rpx; height: 395rpx; margin: 0 auto; }
 .couple-heading { font-family: Georgia, 'Songti SC', serif; margin-top: 0; }
