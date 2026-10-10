@@ -1,0 +1,54 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="loading-line">正在整理你们的计划…</view>
+  <view wx:if="{{errorMessage}}" class="notice error-notice" bindtap="refresh">{{errorMessage}} · 点此重试</view>
+  <block wx:if="{{ready}}">
+    <view class="between greeting">
+      <view><view class="eyebrow">OUR WEDDING NOTES</view><view class="couple-name">{{profile.name1}} <text class="ampersand">&</text> {{profile.name2}}</view></view>
+      <button class="sync-pill" bindtap="openTogether"><text class="status-dot"></text>{{syncLabel}}</button>
+    </view>
+    <view class="hero" bindtap="openTogether">
+      <image class="hero-illustration" src="/assets/illustrations/wedding-hero.webp" mode="aspectFit" />
+      <view class="hero-top">to our happily ever after</view>
+      <view class="countdown-label">{{countdownLabel}}</view>
+      <view wx:if="{{hasDate}}" class="countdown">{{countdown}}<text class="day-unit">天</text></view>
+      <view wx:else class="set-date">定下好日子 <text>↗</text></view>
+      <view class="hero-bottom"><text>{{dateLabel}}</text><text class="hero-edit">{{hasDate ? '调整日期' : '设置婚期'}} ›</text></view>
+    </view>
+    <view class="stat-grid">
+      <view class="card stat-card" bindtap="openTasks">
+        <view class="between"><text class="stat-label">备婚进度</text><image class="stat-icon" src="/assets/illustrations/checklist.png" mode="aspectFit" /></view>
+        <view class="stat-number">{{stats.progress}}<text>%</text></view>
+        <view class="progress-track"><view class="progress-fill" style="width: {{stats.progress}}%;"></view></view>
+        <view class="stat-caption">已完成 {{stats.done}} / {{stats.total}} 件小事</view>
+      </view>
+      <view class="card stat-card" bindtap="openBudget">
+        <view class="between"><text class="stat-label">婚礼预算</text><image class="stat-icon" src="/assets/illustrations/wallet.png" mode="aspectFit" /></view>
+        <view class="budget-number">{{profile.totalBudget ? '¥' + stats.budgetText : '待商量'}}</view>
+        <view class="stat-caption budget-caption">已付 ¥{{stats.paidText}}</view>
+        <view class="stat-caption">{{stats.overBudget ? '预计开支已超预算' : '每一份心意，都有安排'}}</view>
+      </view>
+    </view>
+    <view class="section">
+      <view class="section-head"><text class="section-title">把期待，放进小小的抽屉</text><view class="illustration-subtitle">每个细节，都有你们喜欢的样子。</view></view>
+      <view class="inspiration-grid"><button wx:for="{{inspirations}}" wx:key="name" class="inspiration-card" data-category="{{item.name}}" bindtap="openCategory"><image src="{{item.illustration}}" mode="aspectFit" /><view class="inspiration-name">{{item.name}}</view><view class="inspiration-count">{{item.count}} 件待准备 ↗</view></button></view>
+    </view>
+    <view class="section">
+      <view class="between section-head"><text class="section-title">接下来，一起做</text><button class="text-link" bindtap="openTasks">查看清单 ›</button></view>
+      <view class="card next-card">
+        <view wx:for="{{upcoming}}" wx:key="id" class="next-task" bindtap="openTasks">
+          <button class="checkbox task-check" data-id="{{item.id}}" catchtap="toggle" aria-label="完成{{item.title}}">✓</button>
+          <view class="task-content"><view class="task-title">{{item.title}}</view><view class="task-meta"><text class="{{item.overdue ? 'overdue' : ''}}">{{item.dueLabel}}</text><text class="meta-dot">·</text><text>{{item.owner}}</text></view></view>
+          <text class="task-chevron">›</text>
+        </view>
+        <view wx:if="{{!upcoming.length}}" class="empty"><view class="empty-title">准备好的，都是幸福</view><view class="empty-copy">清单已完成，给彼此一个拥抱吧。</view><button class="text-link" bindtap="openTasks">再记一件小事 ›</button></view>
+      </view>
+    </view>
+    <view class="section journey card">
+      <image class="journey-illustration" src="/assets/illustrations/plant.png" mode="aspectFit" />
+      <view class="eyebrow">ONE STEP AT A TIME</view><view class="journey-title">把期待，一点点变成现实</view>
+      <view class="milestones"><view wx:for="{{stages}}" wx:key="title" class="milestone"><image class="milestone-art" src="{{item.illustration}}" mode="aspectFit" /><view class="milestone-title">{{item.done ? '✓ ' : ''}}{{item.title}}</view><view class="milestone-count">{{item.count}} / {{item.total}}</view></view></view>
+      <view class="journey-note">默认清单的准备阶段 · 按自己的节奏慢慢来</view>
+    </view>
+    <view class="footer-note">婚礼是一天，我们是每一天。</view>
+  </block>
+</view>

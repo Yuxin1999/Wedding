@@ -1,0 +1,8 @@
+.sheet-root { position: fixed; inset: 0; z-index: 100; }
+.sheet-mask { position: absolute; inset: 0; background: rgba(28, 40, 30, .32); }
+.sheet-panel { position: absolute; bottom: 0; left: 0; right: 0; background: #fffefb; border-radius: 34rpx 34rpx 0 0; padding-top: 16rpx; }
+.sheet-handle { width: 66rpx; height: 6rpx; border-radius: 8rpx; margin: 0 auto; background: #dfe2d4; }
+.sheet-header { padding: 22rpx 36rpx; }
+.sheet-close { font-size: 42rpx; color: #859079; width: 60rpx; height: 60rpx; }
+.sheet-body { height: 68vh; }
+.sheet-content { padding: 4rpx 36rpx 48rpx; }

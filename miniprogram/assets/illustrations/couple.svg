@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="340" viewBox="0 0 420 340"><title>花拱门下的两个人</title>
+<path d="M68 293V154C65 1 348 1 347 154v139" fill="#eeeedf"/><path d="M90 291V157C90 30 326 29 326 157v134" fill="#fffbf2"/>
+<g fill="none" stroke="#686b58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M78 290V157C69 3 340 5 337 157v136" stroke="#a1aa8c"/><path d="M37 301c73 7 272 8 344-1" stroke="#ccc5ad"/>
+<path d="M85 198c-26-72-34-86-14-127M321 202c40-76 37-105 18-137" stroke="#8e9e7f"/>
+<path d="M74 133c-31-2-31-30-16-29 10 0 14 14 16 29m1-22c34-7 28-30 12-21-11 7-13 13-12 21M77 172c-32-9-32-28-18-26 10 2 17 14 18 26m256-25c36-17 45-35 25-33-10 1-19 17-25 33m8-29c-23-3-33-30-16-27 14 3 15 16 16 27m-9 61c31-2 43-21 24-23-10-1-19 9-24 23" fill="#aab79a" stroke="none"/>
+<g fill="#e7b8af" stroke="none"><circle cx="66" cy="86" r="9"/><circle cx="77" cy="80" r="9"/><circle cx="83" cy="91" r="9"/><circle cx="72" cy="97" r="9"/><circle cx="344" cy="86" r="8"/><circle cx="354" cy="83" r="8"/><circle cx="360" cy="92" r="8"/><circle cx="349" cy="98" r="8"/></g><circle cx="75" cy="88" r="5" fill="#ebd48e" stroke="none"/><circle cx="351" cy="91" r="4" fill="#ebd48e" stroke="none"/>
+<path d="M153 164c-5-29 0-57 23-59 25-3 35 27 26 62" fill="#666652"/><path d="M164 148c-6 15-9 19-5 31l33 2c1-11-6-22-7-32" fill="#f7dcc4"/>
+<path d="M144 183c11-17 21-17 29-10 7-7 22-5 30 11l-13 30 38 83c-34 9-72 10-105-1l34-84Z" fill="#fffdf8"/>
+<path d="m155 211 35 1m-20 14-15 59m30-58 11 59" stroke="#dbd2bd"/>
+<path d="M158 127c0 43 39 39 39 4-17 5-16-21-23-15-6 8-11 9-16 11Z" fill="#fae5d1"/>
+<path d="M177 140q4 4 8 0" stroke-width="1.5"/><circle cx="168" cy="134" r="1.4" fill="#686b58" stroke="none"/><circle cx="187" cy="134" r="1.4" fill="#686b58" stroke="none"/><path d="M160 145c-11 16-15 40-31 48 9 5 18 6 27 2" stroke="#fff" stroke-width="3"/>
+<path d="M239 158v17h22v-20" fill="#f8dfc5"/><path d="M224 175c14-8 37-8 49 0l13 42-16 12-3 67h-49l-4-70-14-12Z" fill="#a7b298"/><path d="m236 172 13 37 14-37" fill="#fffdf8"/><path d="m241 182 8 5 9-5v12l-9-5-8 5Z" fill="#72795f"/><path d="m227 178 2 27 13-4 8 24v70m18-115-1 24-10-2m-7 53v41"/>
+<ellipse cx="249" cy="136" rx="23" ry="27" fill="#fae5d1"/><path d="M226 135c-12-40 44-49 48-10-20 7-19-13-24-9-4 10-10 9-24 19Z" fill="#686852"/><circle cx="240" cy="139" r="1.5" fill="#686b58"/><circle cx="258" cy="139" r="1.5" fill="#686b58"/><path d="M245 149q5 4 10-1" stroke-width="1.5"/>
+<path d="M212 214c-6 3-13 5-17 2m-43-28 25 22m95-22-43 30" fill="#f9e3cb"/><path d="m192 230 16-35 17 28" fill="#c0c9a5"/>
+<g stroke="none"><circle cx="199" cy="192" r="10" fill="#e4b2a7"/><circle cx="213" cy="191" r="10" fill="#e4b2a7"/><circle cx="224" cy="201" r="9" fill="#eed287"/><circle cx="199" cy="206" r="10" fill="#eed287"/><circle cx="211" cy="204" r="10" fill="#f3c9c1"/></g><path d="m201 223 9 4 8-6m-9 5-5 16m6-15 7 14" stroke="#d5a397"/>
+<path d="m206 76 4-9 5 9 9 3-9 4-4 10-4-10-10-3Z" fill="#ebd28d" stroke="none"/><path d="M251 61c-14-15-32 5 1 23 32-22 12-38-1-23Z" fill="#e5b6ae" stroke="none"/>
+<path d="m109 266-7-8m203-23 8-4m-194-87-7-4m177-40 7-3" stroke="#d3bd8c"/><path d="M155 301h39m25-3h17m17 0h21" stroke-width="4"/>
+</g></svg>

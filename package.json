@@ -1,0 +1,18 @@
+{
+  "name": "wedding-together",
+  "version": "0.1.0",
+  "private": true,
+  "description": "一起备婚 · 韩式插画风微信小程序与本机 Web Demo",
+  "scripts": {
+    "prepare": "node scripts/sync-domain.js",
+    "check": "node scripts/check-project.js",
+    "test": "node --test tests/*.test.js",
+    "verify": "npm run check && npm test",
+    "web": "node scripts/serve-web.js",
+    "start": "node scripts/serve-web.js",
+    "art": "node scripts/draw-illustrations.js",
+    "art:raster": "node scripts/rasterize-illustrations.js",
+    "test:web": "node scripts/test-web.js"
+  },
+  "engines": { "node": ">=20" }
+}

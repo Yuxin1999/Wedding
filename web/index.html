@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf8f4">
+  <meta name="description" content="一起备婚：属于两个人的婚礼手账。计划婚期、分工和预算，把期待一点点变成现实。">
+  <title>一起备婚 · 我们的婚礼手账</title>
+  <link rel="icon" href="/assets/illustrations/rings.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/shared/domain.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#home"><img src="/assets/illustrations/rings.svg" alt="" width="48" height="48"><span>一起备婚<small>OUR LITTLE WEDDING</small></span></a>
+      <div class="sidebar-caption">两个人的幸福小事</div>
+      <nav aria-label="主要导航" class="navigation">
+        <a href="#home" data-nav="home"><img src="/assets/illustrations/calendar.svg" alt=""><span>我们的计划<small>每一天，都更靠近</small></span></a>
+        <a href="#tasks" data-nav="tasks"><img src="/assets/illustrations/checklist.svg" alt=""><span>备婚小清单<small>一件件，慢慢来</small></span><b id="nav-count"></b></a>
+        <a href="#budget" data-nav="budget"><img src="/assets/illustrations/wallet.svg" alt=""><span>心意与预算<small>每一份，都有安排</small></span></a>
+        <a href="#together" data-nav="together"><img src="/assets/illustrations/heart.svg" alt=""><span>我们的小日子<small>写下彼此的约定</small></span></a>
+      </nav>
+      <div class="sidebar-note"><img src="/assets/illustrations/tea.svg" alt="两杯准备间隙的温柔心意"><p>不必赶路，<br>我们慢慢准备。</p><span>one little thing at a time</span></div>
+      <div class="sidebar-bottom"><span class="status-dot"></span>本机体验版<button data-action="about" aria-label="关于本机保存">?</button></div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar"><span id="breadcrumb">我们的婚礼手账</span><div class="topbar-right"><time id="today"></time><button class="save-status" data-action="about"><span class="status-dot"></span>已在本机安放</button><button class="mini-avatar" data-action="profile" aria-label="编辑我们的约定">♡</button></div></header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="page-footer"><span>made for two, with love</span><span>婚礼是一天，我们是每一天。</span><img src="/assets/illustrations/bow.svg" alt="" width="38" height="38"></footer>
+    </div>
+  </div>
+  <dialog id="editor" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
+  <dialog id="confirmation" aria-labelledby="confirm-title"><div class="confirm-inner"><img src="/assets/illustrations/letter.svg" alt="" width="80" height="80"><h2 id="confirm-title"></h2><p id="confirm-copy"></p><div class="confirm-actions"><button type="button" class="button secondary" id="confirm-cancel">再想想</button><button type="button" class="button danger" id="confirm-ok">确定</button></div></div></dialog>
+  <div class="toast" role="status" aria-live="polite" id="toast"></div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "rings",
+    "title": "约定"
+  },
+  {
+    "id": "calendar",
+    "title": "好日子"
+  },
+  {
+    "id": "checklist",
+    "title": "小事清单"
+  },
+  {
+    "id": "wallet",
+    "title": "心意预算"
+  },
+  {
+    "id": "venue",
+    "title": "场地宴席"
+  },
+  {
+    "id": "dress",
+    "title": "婚纱造型"
+  },
+  {
+    "id": "camera",
+    "title": "摄影摄像"
+  },
+  {
+    "id": "flower",
+    "title": "仪式花艺"
+  },
+  {
+    "id": "gift",
+    "title": "宾客礼品"
+  },
+  {
+    "id": "letter",
+    "title": "邀请与心意"
+  },
+  {
+    "id": "cake",
+    "title": "甜蜜仪式"
+  },
+  {
+    "id": "music",
+    "title": "婚礼音乐"
+  },
+  {
+    "id": "bow",
+    "title": "小小装饰"
+  },
+  {
+    "id": "tea",
+    "title": "休息一下"
+  },
+  {
+    "id": "suit",
+    "title": "礼服与领结"
+  },
+  {
+    "id": "heart",
+    "title": "两个人"
+  },
+  {
+    "id": "sparkles",
+    "title": "灵感碎片"
+  },
+  {
+    "id": "plant",
+    "title": "慢慢生长"
+  },
+  {
+    "id": "car",
+    "title": "出发去幸福"
+  },
+  {
+    "id": "couple",
+    "title": "花拱门下的两个人"
+  }
+]

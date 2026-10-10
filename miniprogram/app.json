@@ -1,0 +1,51 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/tasks/index",
+    "pages/budget/index",
+    "pages/together/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "一起备婚",
+    "navigationBarBackgroundColor": "#faf8f4",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#faf8f4",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#93968e",
+    "selectedColor": "#7e8e6b",
+    "backgroundColor": "#fffdf8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "计划",
+        "iconPath": "assets/illustrations/calendar.png",
+        "selectedIconPath": "assets/illustrations/calendar.png"
+      },
+      {
+        "pagePath": "pages/tasks/index",
+        "text": "清单",
+        "iconPath": "assets/illustrations/checklist.png",
+        "selectedIconPath": "assets/illustrations/checklist.png"
+      },
+      {
+        "pagePath": "pages/budget/index",
+        "text": "预算",
+        "iconPath": "assets/illustrations/wallet.png",
+        "selectedIconPath": "assets/illustrations/wallet.png"
+      },
+      {
+        "pagePath": "pages/together/index",
+        "text": "我们",
+        "iconPath": "assets/illustrations/heart.png",
+        "selectedIconPath": "assets/illustrations/heart.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+project.private.config.json
+miniprogram/config.local.js
+*.log
+coverage/
+.env
+.env.*

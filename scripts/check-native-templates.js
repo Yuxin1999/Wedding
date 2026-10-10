@@ -1,0 +1,59 @@
+// Optional: use Tencent's Linux-capable compiler wrapper without adding frontend dependencies.
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const { spawnSync } = require('node:child_process');
+const compilerPath = process.argv[2];
+if (!compilerPath) {
+  console.error('Usage: node scripts/check-native-templates.js /path/to/node_modules/miniprogram-compiler');
+  process.exit(1);
+}
+const compilerRoot = path.resolve(compilerPath);
+const compiler = require(compilerRoot);
+const mini = path.resolve(__dirname, '../miniprogram');
+const config = JSON.parse(fs.readFileSync(path.join(mini, 'app.json'), 'utf8'));
+
+(async () => {
+  const source = compiler.wxmlToJs(mini);
+  const context = vm.createContext({ window: {}, console });
+  const render = vm.runInContext(`(function(global){${source}})({})`, context);
+  const storage = new Map();
+  global.wx = {
+    getStorageSync: key => storage.get(key), setStorageSync: (key, value) => storage.set(key, value),
+    showToast() {}, vibrateShort() {}, switchTab() {}
+  };
+  // Use real page controllers to produce the data supplied to native-compiled templates.
+  for (const pagePath of config.pages) {
+    let page;
+    global.Page = definition => { page = definition; };
+    require(path.join(mini, pagePath + '.js'));
+    page.data = JSON.parse(JSON.stringify(page.data));
+    page.setData = function(patch) {
+      for (const [key, value] of Object.entries(patch)) {
+        const parts = key.split('.'); let parent = this.data;
+        for (const segment of parts.slice(0, -1)) parent = parent[segment] || (parent[segment] = {});
+        parent[parts[parts.length - 1]] = value;
+      }
+    };
+    await page.refresh();
+    assert.equal(page.data.ready, true, pagePath);
+    let tree = render(pagePath + '.wxml')(page.data);
+    assert.ok(tree.children.length, pagePath);
+    if (page.openAdd) { page.openAdd(); tree = render(pagePath + '.wxml')(page.data); }
+    else if (page.openEditor) { page.openEditor(); tree = render(pagePath + '.wxml')(page.data); }
+    assert.ok(tree.children.length, `${pagePath} editor`);
+    console.log(`Native WXML compiled + render tree produced: ${pagePath}`);
+  }
+  assert.ok(render('components/bottom-sheet/index.wxml')({ visible: true, title: '安排' }).children.length);
+  delete global.wx; delete global.Page;
+
+  const platform = process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'windows' : 'linux';
+  const binary = path.join(compilerRoot, 'bin', platform, platform === 'windows' ? 'wcsc.exe' : 'wcsc');
+  const styles = config.pages.map(page => page + '.wxss').concat(['components/bottom-sheet/index.wxss', 'app.wxss']);
+  const result = spawnSync(binary, ['-db', '-pc', '5', ...styles], { cwd: mini, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024 });
+  if (result.error) throw result.error;
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.length > 100, 'No WXSS output');
+  console.log(`Native WXSS compile passed: ${styles.length} stylesheets.`);
+})().catch(error => { console.error(error); process.exitCode = 1; });

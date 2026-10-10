@@ -1,0 +1,30 @@
+<view class="page tasks-page">
+  <image class="page-heading-illustration" src="/assets/illustrations/checklist.png" mode="aspectFit" />
+  <view class="eyebrow">LITTLE THINGS, BIG DAY</view>
+  <view class="between title-row"><view class="page-title">一件件，慢慢来</view><text wx:if="{{ready}}" class="pill">{{stats.done}} / {{stats.total}}</text></view>
+  <view class="subtitle">让准备有条不紊，让期待多一点。</view>
+  <view wx:if="{{loading}}" class="loading-line">正在读取清单…</view>
+  <view wx:if="{{errorMessage}}" class="notice error-notice" bindtap="refresh">{{errorMessage}} · 点此重试</view>
+  <block wx:if="{{ready}}">
+    <view class="progress-track page-progress"><view class="progress-fill" style="width: {{stats.progress}}%;"></view></view>
+    <view class="search"><text class="search-icon">⌕</text><input placeholder="找一件小事" value="{{query}}" bindinput="search" maxlength="60" confirm-type="search" /></view>
+    <view class="between filter-bar"><view class="filters"><button wx:for="{{filters}}" wx:key="key" class="filter {{filter === item.key ? 'selected' : ''}}" data-key="{{item.key}}" bindtap="setFilter">{{item.label}}</button></view><picker range="{{ownerFilters}}" value="{{ownerIndex}}" bindchange="setOwner"><view class="owner-picker">{{ownerFilters[ownerIndex]}}⌄</view></picker></view>
+    <scroll-view scroll-x="{{true}}" class="category-scroll" show-scrollbar="{{false}}"><view class="category-list"><button wx:for="{{categoryFilters}}" wx:key="*this" class="category-chip {{category === item ? 'active' : ''}}" data-category="{{item}}" bindtap="setCategory">{{item}}</button></view></scroll-view>
+    <view wx:for="{{tasks}}" wx:key="id" class="card task-card {{item.done ? 'done-card' : ''}}" data-id="{{item.id}}" bindtap="openEdit">
+      <button class="checkbox {{item.done ? 'checked' : ''}}" data-id="{{item.id}}" catchtap="toggle" aria-label="{{item.done ? '标记未完成' : '标记已完成'}}">✓</button>
+      <view class="task-body"><view class="task-name {{item.done ? 'struck' : ''}}">{{item.title}}</view><view class="task-note" wx:if="{{item.note}}">{{item.note}}</view><view class="task-bottom"><image class="task-category-icon" src="{{item.illustration}}" mode="aspectFit" /><text class="task-category">{{item.category}}</text><text class="task-due {{item.overdue ? 'overdue' : ''}}">{{item.dueLabel}}</text><text class="task-owner">{{item.owner}}</text></view></view>
+    </view>
+    <view wx:if="{{!tasks.length}}" class="empty"><image class="empty-illustration" src="/assets/illustrations/tea.png" mode="aspectFit" /><view class="empty-title">这里暂时没有小事</view><view class="empty-copy">试着换个筛选，或记下新的计划。<view wx:if="{{filter === 'done'}}">完成的小事会在这里留下记录。</view></view><button class="text-link" bindtap="openAdd">＋ 添加任务</button></view>
+    <view wx:if="{{!profile.weddingDate}}" class="notice section">还没决定婚期也没关系。设置婚期后，默认清单会自动换算准备日期。</view>
+    <button class="add-button" bindtap="openAdd">＋ 记一件小事</button>
+  </block>
+</view>
+<bottom-sheet visible="{{editor}}" title="{{editingId ? '这件小事的安排' : '记一件小事'}}" bindclose="closeEditor">
+  <view class="field"><text class="field-label">要做什么</text><input class="field-input" placeholder="比如：周末一起去看场地" maxlength="60" value="{{form.title}}" data-field="title" bindinput="field" /></view>
+  <view class="field"><text class="field-label">分类</text><picker range="{{categories}}" value="{{formCategoryIndex}}" bindchange="chooseCategory"><view class="field-input between"><text>{{form.category}}</text><text class="muted">⌄</text></view></picker></view>
+  <view class="field"><text class="field-label">交给谁来准备</text><view class="choice-row"><button class="choice {{form.assignee === 'both' ? 'active' : ''}}" data-owner="both" bindtap="chooseAssignee">一起</button><button class="choice {{form.assignee === 'p1' ? 'active' : ''}}" data-owner="p1" bindtap="chooseAssignee">{{profile.name1}}</button><button class="choice {{form.assignee === 'p2' ? 'active' : ''}}" data-owner="p2" bindtap="chooseAssignee">{{profile.name2}}</button></view></view>
+  <view class="field"><view class="between"><text class="field-label">计划完成日期</text><button wx:if="{{form.dueDate}}" class="text-link" bindtap="clearDate">清除指定日期</button></view><picker mode="date" start="2000-01-01" end="2100-12-31" value="{{form.dueDate}}" bindchange="chooseDate"><view class="field-input between"><text>{{form.dueDate || (form.daysBefore !== null ? '随婚期调整 · 婚前 ' + form.daysBefore + ' 天' : '选择日期（可选）')}}</text><text class="muted">⌄</text></view></picker><view wx:if="{{form.daysBefore !== null}}" class="field-hint">未指定日期时，会随婚期自动调整；手动指定的日期保持不变。</view></view>
+  <view class="field"><text class="field-label">想补充的话</text><textarea class="field-input" maxlength="300" placeholder="灵感、联系方式，或想和对方说的话…" value="{{form.note}}" data-field="note" bindinput="field" /></view>
+  <button class="primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}">保存安排</button>
+  <button wx:if="{{editingId}}" class="danger-link" bindtap="remove" disabled="{{saving}}">删除这项任务</button>
+</bottom-sheet>
