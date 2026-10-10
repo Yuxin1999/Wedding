@@ -144,7 +144,7 @@
     <section class="together-layout"><div class="couple-poster">${art('couple')}<span class="hand-note">better, together</span><h2>${esc(profile.name1)} <i>&</i> ${esc(profile.name2)}</h2><p>${profile.weddingDate ? esc(profile.weddingDate.replace(/-/g, ' . ')) : '好日子，慢慢定。'}${profile.location ? '<br>' + esc(profile.location) : ''}</p></div>
     <div class="together-right"><section class="card agreement-card"><div class="section-heading"><h2>我们的约定</h2>${art('letter')}</div>${[['婚礼日期', profile.weddingDate || '选一个好日子'], ['婚礼城市 / 场地', profile.location || '还在期待中'], ['婚礼总预算', profile.totalBudget ? '¥ ' + d.formatMoney(profile.totalBudget) : '一起商量']].map(([label, value]) => `<button class="agreement-row" data-action="profile"><span>${label}</span><strong>${esc(value)}</strong><span>↗</span></button>`).join('')}</section>
     <section class="shared-space"><div>${art('heart')}<h3>两个人，一起准备</h3></div><p>这里是本机 Web 体验版，计划保存在当前浏览器。微信小程序开通共同空间后，就能用邀请码邀请伴侣，一起更新。</p><button class="text-button" data-action="about">了解我们的数据 ↗</button></section></div></section>
-    <section class="keepsakes"><button class="card keepsake" data-action="summary">${art('letter')}<span><strong>复制备婚摘要</strong><small>亲手分享给另一个主角</small></span><b>↗</b></button><button class="card keepsake" data-action="export">${art('gift')}<span><strong>${storageError ? '导出原始记录' : '收好一份备份'}</strong><small>把这些小事，留作纪念</small></span><b>↗</b></button><button class="card keepsake" data-action="gallery">${art('sparkles')}<span><strong>翻翻插画小册</strong><small>20 个温柔的婚礼小图案</small></span><b>↗</b></button></section>
+    <section class="keepsakes"><button class="card keepsake" data-action="summary">${art('letter')}<span><strong>复制备婚摘要</strong><small>亲手分享给另一个主角</small></span><b>↗</b></button><button class="card keepsake" data-action="export">${art('gift')}<span><strong>${storageError ? '导出原始记录' : '收好一份备份'}</strong><small>把这些小事，留作纪念</small></span><b>↗</b></button></section>
     <div class="data-actions"><button class="text-button" data-action="import">导入之前的备份</button><span>·</span><button class="text-button reset-link" data-action="reset">重新开始本机计划</button><input type="file" id="import-file" accept="application/json,.json" hidden></div>`;
   }
 
@@ -278,11 +278,6 @@
       else if (action === 'import') document.getElementById('import-file').click();
       else if (action === 'reset') { if (await confirm('重新开始本机计划？', '这会清空当前浏览器的称呼、婚期、任务和预算，恢复初始清单。建议先导出一份备份。', '确认重新开始')) { await replaceWorkspace(d.createWorkspace()); toast('新的手账，已经准备好。'); } }
       else if (action === 'about') info('你们的计划，妥善安放', '<p>这个 Web demo 使用当前浏览器的本地存储，不需要注册或登录，也不会把计划上传到服务器。</p><p>刷新页面后记录还在；清理浏览器数据、无痕模式或换一台设备时，记录可能不会保留。可以在“我们的小日子”中导出和导入备份。</p><p>Web 与微信小程序的本机记录各自保存。双人同步需要在微信小程序中开通云开发并绑定伴侣；这里不会显示虚假的同步成功。</p>', 'heart');
-      else if (action === 'gallery') {
-        const response = await fetch('/assets/illustrations/manifest.json'); if (!response.ok) throw new Error('插画小册暂时打不开，请稍后重试。');
-        const icons = await response.json();
-        info('20 个婚礼小小的可爱', `<p>柔和色块、细细线条。把婚礼里的每一份心意，都画成小小的图案。</p><div class="illustration-gallery">${icons.map(item => `<div>${art(item.id)}<span>${esc(item.title)}</span></div>`).join('')}</div>`, 'sparkles');
-      }
     } catch (error) { toast(error.message || '这次操作没有完成，请再试一次。'); }
   });
   document.addEventListener('input', event => { if (event.target.id === 'task-search') { filters.query = event.target.value; document.getElementById('task-list').innerHTML = taskList(); } });

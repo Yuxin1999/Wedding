@@ -28,7 +28,7 @@
         <button class="pressable local-link" bindtap="localMode" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">查看保留的本机计划</button>
       </block>
     </view>
-    <view class="enter-block enter-last card section tools-card"><button class="pressable tool-row" bindtap="copySummary" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><view><view>复制备婚摘要</view><view class="tool-note">留作纪念，或亲手分享给对方</view></view><text class="chevron">↗</text></button><button class="pressable tool-row" bindtap="openGallery" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><view><view>翻翻插画小册</view><view class="tool-note">20 个温柔的婚礼小图案</view></view><text class="chevron">↗</text></button><button class="pressable tool-row" bindtap="privacy" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>关于我们的数据</text><text class="chevron">›</text></button></view>
+    <view class="enter-block enter-last card section tools-card"><button class="pressable tool-row" bindtap="copySummary" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><view><view>复制备婚摘要</view><view class="tool-note">留作纪念，或亲手分享给对方</view></view><text class="chevron">↗</text></button><button class="pressable tool-row" bindtap="privacy" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100"><text>关于我们的数据</text><text class="chevron">›</text></button></view>
     <view class="footer-note">一起备婚 · 让期待落在每个日常里</view>
   </block>
 </view>
@@ -38,10 +38,6 @@
   <view class="field"><text class="field-label">婚礼城市 / 场地（可选）</text><input class="field-input" maxlength="60" value="{{form.location}}" data-field="location" bindinput="field" placeholder="你们想在哪里说“我愿意”" /></view>
   <view class="field"><text class="field-label">婚礼总预算（元）</text><input class="field-input" type="digit" maxlength="12" value="{{form.budgetInput}}" data-field="budgetInput" bindinput="field" placeholder="还没决定可以先留空" /></view>
   <button class="pressable primary" bindtap="save" loading="{{saving}}" disabled="{{saving}}" hover-class="is-pressed" hover-start-time="20" hover-stay-time="100">保存我们的约定</button>
-</bottom-sheet>
-<bottom-sheet visible="{{gallery}}" title="婚礼小小的可爱" bindclose="closeGallery">
-  <view class="gallery-caption">柔和色块、细细线条，把每一份心意都画成小小的图案。</view>
-  <view class="illustration-gallery"><view wx:for="{{galleryItems}}" wx:key="id" class="gallery-item"><image src="/assets/illustrations/{{item.id}}.png" mode="aspectFit" /><view>{{item.title}}</view></view></view>
 </bottom-sheet>
 <bottom-sheet visible="{{joinEditor}}" busy="{{connecting}}" title="加入伴侣的共同空间" bindclose="closeJoin">
   <view class="field"><text class="field-label">伴侣发来的邀请码</text><input class="field-input code-input" maxlength="12" placeholder="输入 12 位邀请码" value="{{joinCode}}" bindinput="codeInput" /></view>

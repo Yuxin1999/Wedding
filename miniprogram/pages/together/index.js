@@ -1,10 +1,9 @@
 const store = require('../../utils/store');
 const domain = require('../../utils/domain');
 const ui = require('../../utils/ui');
-const galleryItems = require('../../utils/illustration-catalog');
 
 Page({
-  data: { loading: true, ready: false, pageVisible: false, errorMessage: '', editor: false, joinEditor: false, gallery: false, galleryItems, saving: false, connecting: false, form: {}, joinCode: '', inviteCode: '', configured: store.configured(), mode: store.mode() },
+  data: { loading: true, ready: false, pageVisible: false, errorMessage: '', editor: false, joinEditor: false, saving: false, connecting: false, form: {}, joinCode: '', inviteCode: '', configured: store.configured(), mode: store.mode() },
   onHide() { this.setData({ pageVisible: false }); },
   onShow() { this.setData({ pageVisible: true }); this.refresh(); },
   async onPullDownRefresh() { await this.refresh(); wx.stopPullDownRefresh(); },
@@ -71,8 +70,6 @@ Page({
     finally { this.setData({ connecting: false }); }
   },
   copyInvite() { wx.setClipboardData({ data: this.data.inviteCode }); },
-  openGallery() { this.setData({ gallery: true }); },
-  closeGallery() { this.setData({ gallery: false }); },
   async localMode() {
     if (!await ui.confirm('查看本机计划？', '共同空间会保留。本机计划单独保存，不会同步给伴侣；稍后可以重新连接。')) return;
     store.useLocal(); this.setData({ inviteCode: '' }); await this.refresh();

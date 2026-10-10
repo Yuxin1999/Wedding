@@ -32,7 +32,3 @@
 .couple-illustration { display: block; width: 490rpx; height: 395rpx; margin: 0 auto; }
 .couple-heading { font-family: Georgia, 'Songti SC', serif; margin-top: 0; }
 .couple-section .subtitle { font-size: 22rpx; }
-.gallery-caption { color: #a0a88e; font-size: 24rpx; line-height: 1.9; margin-bottom: 24rpx; }
-.illustration-gallery { display: flex; flex-wrap: wrap; gap: 22rpx 10rpx; }
-.gallery-item { width: calc((100% - 30rpx) / 4); text-align: center; font-size: 19rpx; color: #9ba588; }
-.gallery-item image { display: block; width: 100%; height: 125rpx; margin: 0 auto 10rpx; }

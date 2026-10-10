@@ -81,9 +81,6 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('#import-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
     await page.waitForFunction(() => document.getElementById('toast').textContent.includes('数据格式不兼容'));
     assert.match(await page.locator('.couple-poster').textContent(), /小雨/);
-    await page.getByRole('button', { name: /翻翻插画小册/ }).click();
-    await page.locator('.illustration-gallery').waitFor(); assert.equal(await page.locator('.illustration-gallery img').count(), 20);
-    await page.getByRole('button', { name: '关闭弹窗', exact: true }).click();
     await page.screenshot({ path: path.join(output, 'desktop-together.png'), fullPage: true });
 
     const other = await context.newPage(); other.on('pageerror', error => errors.push(error.message));
@@ -173,7 +170,7 @@ fs.mkdirSync(output, { recursive: true });
     assert.match(await mobile.locator('.mini-stat').first().textContent(), /8,000.30/);
     await require('./check-web-categories')(mobile, output);
     assert.deepEqual(errors, []);
-    console.log('Browser checks passed: desktop/mobile navigation, profile/date, task edit/assignment/completion/filtering, budget precision, invalid input, reload persistence, backup export, invalid import preservation, 20-icon gallery, cross-tab conflict and no runtime errors.');
+    console.log('Browser checks passed: desktop/mobile navigation, profile/date, task edit/assignment/completion/filtering, budget precision, invalid input, reload persistence, backup export, invalid import preservation, cross-tab conflict and no runtime errors.');
     console.log(`Screenshots: ${output}`);
     console.log('Linked budget checks passed: task navigation, installment defaults/totals, renaming, backup round-trip, payment-date reminders, paying in full, unbinding and retaining expenses after task deletion.');
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
